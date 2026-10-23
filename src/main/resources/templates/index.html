@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Balance General - PoliDev Studios</title>
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Colores oficiales IPN */
+        .bg-guinda {
+            background-color: #6a1c32 !important;
+            color: white !important;
+        }
+        .text-guinda {
+            color: #6a1c32 !important;
+        }
+        .btn-guinda {
+            background-color: #6a1c32;
+            color: white;
+            border: none;
+        }
+        .btn-guinda:hover {
+            background-color: #501525;
+            color: white;
+        }
+        .border-guinda {
+            border-color: #6a1c32 !important;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<!-- Header Politécnico -->
+<nav class="navbar bg-guinda mb-4 shadow-sm">
+    <div class="container-fluid justify-content-center">
+        <span class="navbar-brand mb-0 h2 fw-bold text-white">🏦 Sistema de Balance General - IPN</span>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row">
+        <!-- Formulario de Registro (Módulo 1) -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-guinda mb-4">
+                <div class="card-header bg-guinda fw-bold">
+                    ➕ Registrar Cuenta
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/guardar}" th:object="${nuevaCuenta}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nombre de la cuenta</label>
+                            <input type="text" class="form-control" th:field="*{nombre}" required placeholder="Ej. Bancos, Caja, Proveedores">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Clasificación</label>
+                            <select class="form-select" th:field="*{clasificacion}" required>
+                                <option value="Activo">Activo</option>
+                                <option value="Pasivo">Pasivo</option>
+                                <option value="Capital">Capital</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Subclasificación</label>
+                            <select class="form-select" th:field="*{subclasificacion}" required>
+                                <option value="Circulante">Circulante (Corto Plazo)</option>
+                                <option value="No Circulante">No Circulante (Largo Plazo)</option>
+                                <option value="Contable">Capital Contable</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Importe ($)</label>
+                            <input type="number" step="0.01" class="form-control" th:field="*{importe}" required>
+                        </div>
+                        <button type="submit" class="btn btn-guinda w-100 fw-bold">Guardar Cuenta</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Datos y Reporte Final (Módulo 5) -->
+        <div class="col-md-8">
+            <div class="card shadow-sm border-guinda mb-4">
+                <div class="card-header bg-guinda fw-bold">
+                    📊 Cuentas Registradas
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-striped table-hover mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Clasificación</th>
+                            <th>Subclasificación</th>
+                            <th class="text-end">Importe</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="cuenta : ${cuentas}">
+                            <td th:text="${cuenta.nombre}"></td>
+                            <td th:text="${cuenta.clasificacion}"><span class="badge bg-secondary"></span></td>
+                            <td th:text="${cuenta.subclasificacion}"></td>
+                            <td class="text-end fw-bold" th:text="'$' + ${#numbers.formatDecimal(cuenta.importe, 1, 'COMMA', 2, 'POINT')}"></td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(cuentas)}">
+                            <td colspan="4" class="text-center text-muted py-4">No hay cuentas registradas. Inicia agregando el capital.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Totales por Clasificación (Módulo 3) -->
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <div class="card bg-white border-info shadow-sm text-center">
+                        <div class="card-body py-2">
+                            <h6 class="text-info mb-1 fw-bold">Total Activo</h6>
+                            <h5 class="mb-0" th:text="'$' + ${#numbers.formatDecimal(totalActivo, 1, 'COMMA', 2, 'POINT')}"></h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-white border-warning shadow-sm text-center">
+                        <div class="card-body py-2">
+                            <h6 class="text-warning mb-1 fw-bold">Total Pasivo</h6>
+                            <h5 class="mb-0" th:text="'$' + ${#numbers.formatDecimal(totalPasivo, 1, 'COMMA', 2, 'POINT')}"></h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-white border-success shadow-sm text-center">
+                        <div class="card-body py-2">
+                            <h6 class="text-success mb-1 fw-bold">Total Capital</h6>
+                            <h5 class="mb-0" th:text="'$' + ${#numbers.formatDecimal(totalCapital, 1, 'COMMA', 2, 'POINT')}"></h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Validación de Ecuación Contable (Módulo 4) -->
+            <div class="alert shadow-sm text-center fw-bold"
+                 th:classappend="${ecuacionValida} ? 'alert-success border-success' : 'alert-danger border-danger'">
+                <h5 class="mb-0" th:text="${ecuacionValida} ? '✅ Ecuación Cuadrada (Activo = Pasivo + Capital)' : '❌ Descuadre en la Ecuación Contable'"></h5>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

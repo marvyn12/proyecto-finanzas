@@ -1,0 +1,39 @@
+/* custom.css - Paleta Institucional IPN */
+:root {
+    --ipn-guinda: #6A1C32;
+    --ipn-guinda-oscuro: #4A1322;
+}
+
+/* Cambiar el color azul por defecto de AdminLTE al Guinda IPN */
+.bg-primary, .card-primary:not(.card-outline)>.card-header {
+    background-color: var(--ipn-guinda) !important;
+    color: #fff;
+}
+
+.btn-primary {
+    background-color: var(--ipn-guinda);
+    border-color: var(--ipn-guinda);
+}
+
+.btn-primary:hover {
+    background-color: var(--ipn-guinda-oscuro);
+    border-color: var(--ipn-guinda-oscuro);
+}
+
+.card-primary.card-outline {
+    border-top: 3px solid var(--ipn-guinda);
+}
+
+.sidebar-dark-primary .nav-sidebar>.nav-item>.nav-link.active,
+.sidebar-light-primary .nav-sidebar>.nav-item>.nav-link.active {
+    background-color: var(--ipn-guinda);
+    color: #fff;
+}
+
+a {
+    color: var(--ipn-guinda);
+}
+
+a:hover {
+    color: var(--ipn-guinda-oscuro);
+}
