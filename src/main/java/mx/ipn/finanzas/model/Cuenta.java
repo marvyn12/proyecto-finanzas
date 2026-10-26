@@ -1,9 +1,11 @@
 package mx.ipn.finanzas.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
 @Entity
-@Table(name = "cuentas")
 public class Cuenta {
 
     @Id
@@ -11,21 +13,12 @@ public class Cuenta {
     private Long id;
 
     private String nombre;
-    private String clasificacion; // Activo, Pasivo, Capital
-    private String subclasificacion; // Circulante, No Circulante
+    private String clasificacion;
+    private String subclasificacion;
     private Double importe;
 
-    // Constructor vacío (obligatorio para JPA)
-    public Cuenta() {
-    }
-
-    // Constructor con parámetros
-    public Cuenta(String nombre, String clasificacion, String subclasificacion, Double importe) {
-        this.nombre = nombre;
-        this.clasificacion = clasificacion;
-        this.subclasificacion = subclasificacion;
-        this.importe = importe;
-    }
+    // La nueva columna opcional para comentarios/detalles
+    private String comentarios;
 
     // Getters y Setters
     public Long getId() { return id; }
@@ -42,4 +35,7 @@ public class Cuenta {
 
     public Double getImporte() { return importe; }
     public void setImporte(Double importe) { this.importe = importe; }
+
+    public String getComentarios() { return comentarios; }
+    public void setComentarios(String comentarios) { this.comentarios = comentarios; }
 }

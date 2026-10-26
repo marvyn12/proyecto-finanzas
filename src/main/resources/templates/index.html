@@ -2,150 +2,496 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Balance General - PoliDev Studios</title>
-    <!-- Bootstrap 5 CDN -->
+    <title>Sistema Contable Avanzado</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* Colores oficiales IPN */
-        .bg-guinda {
-            background-color: #6a1c32 !important;
-            color: white !important;
-        }
-        .text-guinda {
-            color: #6a1c32 !important;
-        }
-        .btn-guinda {
-            background-color: #6a1c32;
-            color: white;
-            border: none;
-        }
-        .btn-guinda:hover {
-            background-color: #501525;
-            color: white;
-        }
-        .border-guinda {
-            border-color: #6a1c32 !important;
-        }
+        body { background-color: #f4f6f9; font-family: Arial, sans-serif; }
+        .bg-guinda { background-color: #6a1c32 !important; color: white; }
+
+        .corte-suma { border-bottom: 1px solid black; }
+        .corte-final { border-bottom: 4px double black; }
+        .signo-pesos::before { content: "$ "; float: left; }
+        .sangria { padding-left: 20px; }
+
+        .report-section { background: white; padding: 40px; border-radius: 4px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .col-comentario { display: none; width: 25%; font-style: italic; color: #666; font-size: 0.8em; }
+        .mostrar-comentarios .col-comentario { display: table-cell; }
+        .table-contable td { padding: 4px 8px; border: none; vertical-align: middle; }
+
+        .signature-line { border-top: 1px solid black; width: 80%; margin: 0 auto; margin-top: 50px; padding-top: 5px; }
     </style>
 </head>
-<body class="bg-light">
+<body>
 
-<!-- Header Politécnico -->
 <nav class="navbar bg-guinda mb-4 shadow-sm">
     <div class="container-fluid justify-content-center">
-        <span class="navbar-brand mb-0 h2 fw-bold text-white">🏦 Sistema de Balance General - IPN</span>
+        <span class="navbar-brand mb-0 h4 fw-bold">Sistema Contable Avanzado - IPN</span>
     </div>
 </nav>
 
-<div class="container">
+<div class="container-fluid px-4">
     <div class="row">
-        <!-- Formulario de Registro (Módulo 1) -->
-        <div class="col-md-4">
-            <div class="card shadow-sm border-guinda mb-4">
-                <div class="card-header bg-guinda fw-bold">
-                    ➕ Registrar Cuenta
-                </div>
+
+        <!-- Formulario Operativo -->
+        <div class="col-lg-3">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-dark text-white fw-bold">Registro Operativo</div>
                 <div class="card-body">
-                    <form th:action="@{/guardar}" th:object="${nuevaCuenta}" method="post">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Nombre de la cuenta</label>
-                            <input type="text" class="form-control" th:field="*{nombre}" required placeholder="Ej. Bancos, Caja, Proveedores">
+
+                    <!-- Configuración de Empresa y Periodo -->
+                    <div class="mb-4 pb-3 border-bottom">
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold">Nombre de la Empresa</label>
+                            <input type="text" id="nombreEmpresa" class="form-control form-control-sm" placeholder="Ej. Comercializadora S.A." onkeyup="actualizarEncabezado()">
                         </div>
+                        <div class="row g-1 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Fecha Inicio</label>
+                                <input type="date" id="fechaInicio" class="form-control form-control-sm" onchange="actualizarEncabezado()">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Fecha Fin</label>
+                                <input type="date" id="fechaFin" class="form-control form-control-sm" onchange="actualizarEncabezado()">
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline-danger btn-sm w-100 fw-bold" data-bs-toggle="modal" data-bs-target="#modalReiniciar">
+                            Reiniciar / Nuevo Ejercicio
+                        </button>
+                    </div>
+
+                    <form th:action="@{/guardar}" th:object="${nuevaCuenta}" method="post" id="formCuenta" onsubmit="confirmarRegistro(event)">
+
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Clasificación</label>
-                            <select class="form-select" th:field="*{clasificacion}" required>
+                            <label class="form-label small fw-bold">Cuenta Contable</label>
+                            <select class="form-select border-dark" id="selectorCuenta" onchange="gestionarTipoCuenta()" required>
+                            </select>
+                            <div id="divCuentaNueva" class="mt-2 d-none">
+                                <input type="text" class="form-control border-primary" id="inputNuevaCuenta" placeholder="Nombre de tu nueva cuenta">
+                            </div>
+                            <input type="hidden" th:field="*{nombre}" id="nombreRealCuenta">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Clasificación</label>
+                            <select class="form-select" th:field="*{clasificacion}" id="selectClasificacion" required>
                                 <option value="Activo">Activo</option>
                                 <option value="Pasivo">Pasivo</option>
-                                <option value="Capital">Capital</option>
+                                <option value="Capital">Capital Contable</option>
+                                <option value="Ingreso">Ingreso (Ventas)</option>
+                                <option value="Egreso">Egreso (Gastos/Costos)</option>
                             </select>
                         </div>
+
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Subclasificación</label>
-                            <select class="form-select" th:field="*{subclasificacion}" required>
-                                <option value="Circulante">Circulante (Corto Plazo)</option>
-                                <option value="No Circulante">No Circulante (Largo Plazo)</option>
-                                <option value="Contable">Capital Contable</option>
+                            <label class="form-label small fw-bold">Subclasificación</label>
+                            <select class="form-select" th:field="*{subclasificacion}" id="selectSubclasificacion">
+                                <option value="Circulante">Circulante</option>
+                                <option value="No Circulante">No Circulante</option>
+                                <option value="Ventas">Ventas (Resultados)</option>
+                                <option value="Costo">Costo de Ventas (Resultados)</option>
+                                <option value="Gasto">Gasto Operativo (Resultados)</option>
                             </select>
                         </div>
+
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Importe ($)</label>
-                            <input type="number" step="0.01" class="form-control" th:field="*{importe}" required>
+                            <label class="form-label small fw-bold">Comentarios / Detalle (Opcional)</label>
+                            <input type="text" class="form-control" th:field="*{comentarios}" placeholder="Número de factura, concepto...">
                         </div>
-                        <button type="submit" class="btn btn-guinda w-100 fw-bold">Guardar Cuenta</button>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold">Importe ($)</label>
+                            <input type="text" class="form-control" id="importeVisual" placeholder="150,000.00" onkeyup="formatearMoneda(this)" required>
+                            <input type="hidden" th:field="*{importe}" id="importeReal">
+                        </div>
+
+                        <button type="submit" class="btn bg-guinda w-100 fw-bold">Registrar Movimiento</button>
                     </form>
                 </div>
             </div>
         </div>
 
-        <!-- Tabla de Datos y Reporte Final (Módulo 5) -->
-        <div class="col-md-8">
-            <div class="card shadow-sm border-guinda mb-4">
-                <div class="card-header bg-guinda fw-bold">
-                    📊 Cuentas Registradas
+        <!-- Documentos Financieros Clásicos -->
+        <div class="col-lg-9">
+
+            <div class="d-flex justify-content-between mb-3">
+                <div>
+                    <input type="checkbox" class="form-check-input me-1" id="toggleComentarios" onchange="toggleComentarios()">
+                    <label class="form-check-label fw-bold">Mostrar columna de comentarios</label>
                 </div>
-                <div class="card-body p-0">
-                    <table class="table table-striped table-hover mb-0">
-                        <thead class="table-light">
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Clasificación</th>
-                            <th>Subclasificación</th>
-                            <th class="text-end">Importe</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="cuenta : ${cuentas}">
-                            <td th:text="${cuenta.nombre}"></td>
-                            <td th:text="${cuenta.clasificacion}"><span class="badge bg-secondary"></span></td>
-                            <td th:text="${cuenta.subclasificacion}"></td>
-                            <td class="text-end fw-bold" th:text="'$' + ${#numbers.formatDecimal(cuenta.importe, 1, 'COMMA', 2, 'POINT')}"></td>
-                        </tr>
-                        <tr th:if="${#lists.isEmpty(cuentas)}">
-                            <td colspan="4" class="text-center text-muted py-4">No hay cuentas registradas. Inicia agregando el capital.</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <button class="btn btn-outline-dark fw-bold" onclick="generarPDF()">Exportar a PDF</button>
             </div>
 
-            <!-- Totales por Clasificación (Módulo 3) -->
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <div class="card bg-white border-info shadow-sm text-center">
-                        <div class="card-body py-2">
-                            <h6 class="text-info mb-1 fw-bold">Total Activo</h6>
-                            <h5 class="mb-0" th:text="'$' + ${#numbers.formatDecimal(totalActivo, 1, 'COMMA', 2, 'POINT')}"></h5>
+            <div id="documentoContable" class="report-section">
+
+                <!-- ENCABEZADO OFICIAL -->
+                <div class="text-center mb-4 border-bottom pb-3">
+                    <h3 id="etiquetaEmpresa" class="fw-bold text-uppercase mb-1">NOMBRE DE LA EMPRESA</h3>
+                    <h5 class="fw-bold text-uppercase mb-1">ESTADOS FINANCIEROS</h5>
+                    <p id="etiquetaPeriodo" class="text-muted mb-0"></p>
+                </div>
+
+                <!-- ESTADO DE RESULTADOS -->
+                <div class="text-center mb-2">
+                    <h6 class="fw-bold text-uppercase bg-light py-1 border">Estado de Resultados</h6>
+                </div>
+
+                <table class="table table-contable w-85 mx-auto mb-4" id="tablaResultados">
+                    <tbody>
+                    <tr>
+                        <td class="col-comentario">Ingresos totales</td>
+                        <td>Ventas Totales</td>
+                        <td class="text-end signo-pesos" th:text="${#numbers.formatDecimal(ventas, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="col-comentario">Valor de lo vendido</td>
+                        <td class="sangria">(-) Costo de Ventas</td>
+                        <td class="text-end corte-suma" th:text="${#numbers.formatDecimal(costos, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr class="fw-bold">
+                        <td class="col-comentario">Margen comercial</td>
+                        <td>= Utilidad Bruta</td>
+                        <td></td>
+                        <td class="text-end signo-pesos" th:text="${#numbers.formatDecimal(utilidadBruta, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="col-comentario">Operación del negocio</td>
+                        <td class="sangria">(-) Gastos de Operación</td>
+                        <td class="text-end corte-suma" th:text="${#numbers.formatDecimal(gastos, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr class="fw-bold fs-5">
+                        <td class="col-comentario">Ganancia neta del periodo</td>
+                        <td>= UTILIDAD NETA DEL EJERCICIO</td>
+                        <td></td>
+                        <td></td>
+                        <td class="text-end signo-pesos corte-final" th:text="${#numbers.formatDecimal(utilidadNeta, 1, 'COMMA', 2, 'POINT')}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <!-- BALANCE GENERAL -->
+                <div class="text-center mb-2 mt-4">
+                    <h6 class="fw-bold text-uppercase bg-light py-1 border">Balance General</h6>
+                </div>
+
+                <div class="row">
+                    <!-- ACTIVO -->
+                    <div class="col-md-6 pe-4 border-end">
+                        <h6 class="fw-bold text-center border-bottom pb-2">ACTIVO</h6>
+                        <table class="table table-contable w-100" id="tablaActivo">
+                            <tbody>
+                            <tr th:each="cuenta, iterStat : ${cuentas}" th:if="${cuenta.clasificacion == 'Activo'}">
+                                <td class="col-comentario" th:text="${cuenta.comentarios}"></td>
+                                <td th:text="${cuenta.nombre}"></td>
+                                <td class="text-end" th:classappend="${iterStat.first} ? 'signo-pesos' : ''" th:text="${#numbers.formatDecimal(cuenta.importe, 1, 'COMMA', 2, 'POINT')}"></td>
+                            </tr>
+                            <tr class="fw-bold mt-2">
+                                <td class="col-comentario"></td>
+                                <td>TOTAL ACTIVO</td>
+                                <td class="text-end signo-pesos corte-final" th:text="${#numbers.formatDecimal(totalActivo, 1, 'COMMA', 2, 'POINT')}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- PASIVO Y CAPITAL -->
+                    <div class="col-md-6 ps-4">
+                        <h6 class="fw-bold text-center border-bottom pb-2">PASIVO</h6>
+                        <table class="table table-contable w-100 mb-3" id="tablaPasivo">
+                            <tbody>
+                            <tr th:each="cuenta, iterStat : ${cuentas}" th:if="${cuenta.clasificacion == 'Pasivo'}">
+                                <td class="col-comentario" th:text="${cuenta.comentarios}"></td>
+                                <td th:text="${cuenta.nombre}"></td>
+                                <td class="text-end" th:classappend="${iterStat.first} ? 'signo-pesos' : ''" th:text="${#numbers.formatDecimal(cuenta.importe, 1, 'COMMA', 2, 'POINT')}"></td>
+                            </tr>
+                            <tr class="fw-bold">
+                                <td class="col-comentario"></td>
+                                <td>TOTAL PASIVO</td>
+                                <td class="text-end corte-suma" th:text="${#numbers.formatDecimal(totalPasivo, 1, 'COMMA', 2, 'POINT')}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        <h6 class="fw-bold text-center border-bottom pb-2">CAPITAL CONTABLE</h6>
+                        <table class="table table-contable w-100" id="tablaCapital">
+                            <tbody>
+                            <tr th:each="cuenta, iterStat : ${cuentas}" th:if="${cuenta.clasificacion == 'Capital'}">
+                                <td class="col-comentario" th:text="${cuenta.comentarios}"></td>
+                                <td th:text="${cuenta.nombre}"></td>
+                                <td class="text-end" th:classappend="${iterStat.first} ? 'signo-pesos' : ''" th:text="${#numbers.formatDecimal(cuenta.importe, 1, 'COMMA', 2, 'POINT')}"></td>
+                            </tr>
+                            <tr>
+                                <td class="col-comentario">Traspaso del Edo. de Resultados</td>
+                                <td>Utilidad Neta del Ejercicio</td>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(utilidadNeta, 1, 'COMMA', 2, 'POINT')}"></td>
+                            </tr>
+                            <tr class="fw-bold">
+                                <td class="col-comentario"></td>
+                                <td>SUMA PASIVO Y CAPITAL</td>
+                                <td class="text-end signo-pesos corte-final" th:text="${#numbers.formatDecimal(totalPasivo + totalCapital + utilidadNeta, 1, 'COMMA', 2, 'POINT')}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- PANEL DE DIAGNÓSTICO DINÁMICO CONTABLE -->
+                <div class="alert mt-4 text-center fw-bold html2pdf__exclude" id="panelDiagnostico"
+                     th:classappend="${ecuacionValida} ? 'alert-success' : 'alert-danger'">
+                    <span id="textoDiagnostico" th:text="${ecuacionValida} ? 'Ecuacion Contable Cuadrada correctamente.' : 'Atencion: Descuadre detectado en la Ecuacion Contable (Activo != Pasivo + Capital + Utilidad). Verifique que sus cuentas de capital, pasivos o ingresos esten registradas correctamente.'"></span>
+                </div>
+
+                <!-- PIE DE FIRMAS OFICIAL -->
+                <div class="row mt-4 pt-3 text-center">
+                    <div class="col-4">
+                        <div class="signature-line">
+                            <p class="fw-bold small mb-0">Elaboró</p>
+                            <p class="small text-muted">Contador General</p>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="signature-line">
+                            <p class="fw-bold small mb-0">Revisó</p>
+                            <p class="small text-muted">Auditor Interno</p>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="signature-line">
+                            <p class="fw-bold small mb-0">Autorizó</p>
+                            <p class="small text-muted">Director General</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card bg-white border-warning shadow-sm text-center">
-                        <div class="card-body py-2">
-                            <h6 class="text-warning mb-1 fw-bold">Total Pasivo</h6>
-                            <h5 class="mb-0" th:text="'$' + ${#numbers.formatDecimal(totalPasivo, 1, 'COMMA', 2, 'POINT')}"></h5>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card bg-white border-success shadow-sm text-center">
-                        <div class="card-body py-2">
-                            <h6 class="text-success mb-1 fw-bold">Total Capital</h6>
-                            <h5 class="mb-0" th:text="'$' + ${#numbers.formatDecimal(totalCapital, 1, 'COMMA', 2, 'POINT')}"></h5>
-                        </div>
-                    </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Confirmación de Registro -->
+<div class="modal fade" id="modalRegistro" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-body text-center p-5">
+                <h3 class="text-success mb-3">Movimiento Registrado</h3>
+                <p class="text-muted">Los saldos se han actualizado correctamente en el sistema.</p>
+                <div class="spinner-border text-success mt-2" role="status"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Reiniciar Ejercicio -->
+<div class="modal fade" id="modalReiniciar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-body text-center p-4">
+                <h4 class="text-danger mb-3">Iniciar Nuevo Ejercicio</h4>
+                <p class="text-muted small">Esto eliminará todas las cuentas actuales de la base de datos para comenzar desde cero.</p>
+                <div class="d-flex justify-content-center gap-3 mt-4">
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <form th:action="@{/reiniciar}" method="post">
+                        <button type="submit" class="btn btn-danger px-4">Si, Reiniciar</button>
+                    </form>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
 
-            <!-- Validación de Ecuación Contable (Módulo 4) -->
-            <div class="alert shadow-sm text-center fw-bold"
-                 th:classappend="${ecuacionValida} ? 'alert-success border-success' : 'alert-danger border-danger'">
-                <h5 class="mb-0" th:text="${ecuacionValida} ? '✅ Ecuación Cuadrada (Activo = Pasivo + Capital)' : '❌ Descuadre en la Ecuación Contable'"></h5>
+<!-- MODAL: Generando PDF -->
+<div class="modal fade" id="modalPDF" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-body text-center p-5">
+                <h3 class="text-danger mb-3">Exportando Documento</h3>
+                <p class="text-muted">Generando el reporte financiero oficial...</p>
+                <div class="spinner-grow text-danger mt-2" role="status"></div>
             </div>
-
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    let catalogo = JSON.parse(localStorage.getItem('catalogoCuentasIPN')) || {
+        "Activo": { "Caja": "Circulante", "Bancos": "Circulante", "Clientes": "Circulante", "Inventario Inicial": "Circulante", "Inventario Final": "Circulante", "Equipo de Cómputo": "No Circulante" },
+        "Pasivo": { "Proveedores": "Circulante", "Acreedores Diversos": "Circulante", "Impuestos por Pagar": "Circulante" },
+        "Capital": { "Capital Social": "Contable" },
+        "Ingreso": { "Ventas": "Ventas" },
+        "Egreso": { "Costo de Ventas": "Costo", "Gastos de Administración": "Gasto", "Gastos de Venta": "Gasto" }
+    };
+
+    function cargarSelectCuentas() {
+        const select = document.getElementById('selectorCuenta');
+        select.innerHTML = '<option value="" disabled selected>Seleccione una cuenta...</option>';
+
+        for (let clasificacion in catalogo) {
+            let optgroup = document.createElement('optgroup');
+            optgroup.label = clasificacion;
+            for (let nombreCuenta in catalogo[clasificacion]) {
+                let option = document.createElement('option');
+                option.value = nombreCuenta;
+                option.text = nombreCuenta;
+                option.dataset.cls = clasificacion;
+                option.dataset.sub = catalogo[clasificacion][nombreCuenta];
+                optgroup.appendChild(option);
+            }
+            select.appendChild(optgroup);
+        }
+
+        let optionCustom = document.createElement('option');
+        optionCustom.value = "CUSTOM";
+        optionCustom.text = "Agregar nueva cuenta...";
+        optionCustom.className = "fw-bold text-primary";
+        select.appendChild(optionCustom);
+    }
+    cargarSelectCuentas();
+
+    function gestionarTipoCuenta() {
+        const select = document.getElementById('selectorCuenta');
+        const divNueva = document.getElementById('divCuentaNueva');
+        const inputNueva = document.getElementById('inputNuevaCuenta');
+        const selectCls = document.getElementById('selectClasificacion');
+        const selectSub = document.getElementById('selectSubclasificacion');
+
+        if (select.value === "CUSTOM") {
+            divNueva.classList.remove('d-none');
+            inputNueva.required = true;
+            selectCls.style.pointerEvents = 'auto';
+            selectSub.style.pointerEvents = 'auto';
+            selectCls.style.backgroundColor = 'white';
+            selectSub.style.backgroundColor = 'white';
+        } else {
+            divNueva.classList.add('d-none');
+            inputNueva.required = false;
+            const selectedOption = select.options[select.selectedIndex];
+            selectCls.value = selectedOption.dataset.cls;
+            selectSub.value = selectedOption.dataset.sub;
+
+            selectCls.style.pointerEvents = 'none';
+            selectSub.style.pointerEvents = 'none';
+            selectCls.style.backgroundColor = '#e9ecef';
+            selectSub.style.backgroundColor = '#e9ecef';
+        }
+    }
+
+    function confirmarRegistro(event) {
+        event.preventDefault();
+
+        const select = document.getElementById('selectorCuenta');
+        const inputNueva = document.getElementById('inputNuevaCuenta');
+        const nombreReal = document.getElementById('nombreRealCuenta');
+        const cls = document.getElementById('selectClasificacion').value;
+        const sub = document.getElementById('selectSubclasificacion').value;
+
+        if (select.value === "CUSTOM") {
+            let nuevoNombre = inputNueva.value.trim();
+            nombreReal.value = nuevoNombre;
+            if (!catalogo[cls]) catalogo[cls] = {};
+            catalogo[cls][nuevoNombre] = sub;
+            localStorage.setItem('catalogoCuentasIPN', JSON.stringify(catalogo));
+        } else {
+            nombreReal.value = select.value;
+        }
+
+        document.getElementById('selectClasificacion').style.pointerEvents = 'auto';
+        document.getElementById('selectSubclasificacion').style.pointerEvents = 'auto';
+
+        var modal = new bootstrap.Modal(document.getElementById('modalRegistro'));
+        modal.show();
+
+        setTimeout(() => {
+            document.getElementById('formCuenta').submit();
+        }, 1000);
+    }
+
+    function formatearMoneda(input) {
+        let valorLimpio = input.value.replace(/[^0-9.]/g, '');
+        if (valorLimpio !== '') {
+            let partes = valorLimpio.split('.');
+            partes[0] = parseInt(partes[0]).toLocaleString('en-US');
+            input.value = partes.join('.');
+            document.getElementById('importeReal').value = valorLimpio;
+        } else {
+            document.getElementById('importeReal').value = '';
+        }
+    }
+
+    function formatearFecha(fechaStr) {
+        if (!fechaStr) return '';
+        const partes = fechaStr.split('-');
+        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+    }
+
+    function actualizarEncabezado() {
+        const empresa = document.getElementById('nombreEmpresa').value.trim();
+        const inicio = document.getElementById('fechaInicio').value;
+        const fin = document.getElementById('fechaFin').value;
+
+        let textoPeriodo = '';
+        if (inicio && fin) {
+            textoPeriodo = `Del ${formatearFecha(inicio)} al ${formatearFecha(fin)}`;
+        } else if (inicio) {
+            textoPeriodo = `A partir del ${formatearFecha(inicio)}`;
+        }
+
+        document.getElementById('etiquetaEmpresa').innerText = empresa ? empresa : 'NOMBRE DE LA EMPRESA';
+        document.getElementById('etiquetaPeriodo').innerText = textoPeriodo;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const hoy = new Date();
+        const yyyy = hoy.getFullYear();
+        const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+        const dd = String(hoy.getDate()).padStart(2, '0');
+
+        document.getElementById('fechaInicio').value = `${yyyy}-${mm}-01`;
+        document.getElementById('fechaFin').value = `${yyyy}-${mm}-${dd}`;
+        actualizarEncabezado();
+    });
+
+    function toggleComentarios() {
+        const tabla = document.getElementById('documentoContable');
+        if(document.getElementById('toggleComentarios').checked) {
+            tabla.classList.add('mostrar-comentarios');
+        } else {
+            tabla.classList.remove('mostrar-comentarios');
+        }
+    }
+
+    function generarPDF() {
+        var modal = new bootstrap.Modal(document.getElementById('modalPDF'));
+        modal.show();
+
+        setTimeout(() => {
+            const elemento = document.getElementById('documentoContable');
+            const empresaLimpia = (document.getElementById('nombreEmpresa').value.trim() || 'Empresa').replace(/\s+/g, '_');
+            const inicio = document.getElementById('fechaInicio').value || 'inicio';
+            const fin = document.getElementById('fechaFin').value || 'fin';
+
+            const nombreArchivo = `Estado_financiero_de_${empresaLimpia}_del_${inicio}_al_${fin}.pdf`;
+
+            html2pdf().set({
+                margin: [10, 10, 15, 10],
+                filename: nombreArchivo,
+                image: { type: 'jpeg', quality: 1.0 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            }).from(elemento).save().then(() => {
+                modal.hide();
+            });
+        }, 1500);
+    }
+</script>
+
 </body>
 </html>
