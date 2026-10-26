@@ -1,304 +1,491 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Sistema Contable Avanzado</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Estado de Resultados · IPN</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- jsPDF: el PDF se dibuja en vectores (texto nítido), no como captura de pantalla -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <style>
-        body { background-color: #f4f6f9; font-family: Arial, sans-serif; }
-        .bg-guinda { background-color: #6a1c32 !important; color: white; }
+        :root {
+            --guinda: #6c1d45;
+            --guinda-oscuro: #531535;
+            --guinda-suave: #f6edf1;
+            --tinta: #221c1f;
+            --tinta-2: #4a4246;
+            --gris: #77707a;
+            --linea: #e4dfe1;
+            --fondo: #f4f2f0;
+            --papel: #fffefb;
+            --mal: #b3261e;
+            --mal-suave: #fbeceb;
+            --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+            --serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+        }
 
-        .corte-suma { border-bottom: 1px solid black; }
-        .corte-final { border-bottom: 4px double black; }
-        .signo-pesos::before { content: "$ "; float: left; }
-        .sangria { padding-left: 20px; }
+        body { background: var(--fondo); color: var(--tinta); font-family: var(--sans); font-size: 15px; }
 
-        .report-section { background: white; padding: 40px; border-radius: 4px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        .col-comentario { display: none; width: 25%; font-style: italic; color: #666; font-size: 0.8em; }
-        .mostrar-comentarios .col-comentario { display: table-cell; }
-        .table-contable td { padding: 4px 8px; border: none; vertical-align: middle; }
+        /* ---------- Barra superior ---------- */
+        .topbar { background: var(--guinda); color: #fff; border-bottom: 3px solid var(--guinda-oscuro); }
+        .topbar-inner { max-width: 1520px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; gap: 16px; }
+        .sello {
+            width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center;
+            background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25);
+            font-family: var(--serif); font-size: 22px; font-weight: 700;
+        }
+        .marca-titulo { font-weight: 700; font-size: 17px; line-height: 1.1; letter-spacing: .01em; }
+        .marca-sub { font-size: 12.5px; opacity: .75; }
+        .topbar-meta { margin-left: auto; text-align: right; font-size: 13px; line-height: 1.35; }
+        .topbar-meta strong { display: block; font-size: 14px; letter-spacing: .02em; }
+        .topbar-meta span { opacity: .8; }
 
-        .signature-line { border-top: 1px solid black; width: 80%; margin: 0 auto; margin-top: 50px; padding-top: 5px; }
+        /* ---------- Layout ---------- */
+        .layout { max-width: 1520px; margin: 0 auto; padding: 24px; display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 24px; align-items: start; }
+        .panel { position: sticky; top: 16px; display: flex; flex-direction: column; gap: 16px; }
+
+        .tarjeta { background: #fff; border: 1px solid var(--linea); border-radius: 12px; padding: 18px 18px 20px; }
+        .tarjeta-titulo { font-size: 12px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--gris); margin: 0 0 14px; display: flex; align-items: center; gap: 8px; }
+        .tarjeta-titulo i { color: var(--guinda); font-size: 14px; }
+
+        .form-label { font-size: 12.5px; font-weight: 600; color: var(--tinta-2); margin-bottom: 4px; }
+        .form-control, .form-select { border-color: #d8d2d5; border-radius: 8px; font-size: 14px; }
+        .form-control:focus, .form-select:focus { border-color: var(--guinda); box-shadow: 0 0 0 3px rgba(108,29,69,.14); }
+        .input-group-text { background: #faf8f9; border-color: #d8d2d5; color: var(--gris); font-size: 13.5px; }
+        .ayuda { font-size: 12px; color: var(--gris); margin-top: 4px; }
+
+        .fila-label { display: flex; align-items: baseline; justify-content: space-between; }
+        .link-nueva { border: 0; background: none; padding: 0; font-size: 12.5px; font-weight: 600; color: var(--guinda); }
+        .link-nueva:hover { text-decoration: underline; }
+        .rubro-info { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 12.5px; color: var(--gris); min-height: 22px; }
+        .rubro-info .chip { font-size: 11.5px; }
+
+        .tasas { border-top: 1px dashed var(--linea); margin-top: 14px; padding-top: 12px; }
+        .tasas .input-group-text { justify-content: center; font-weight: 600; color: var(--tinta-2); }
+        .tasas .form-control { min-width: 0; text-align: right; }
+
+        .btn-guinda { background: var(--guinda); border-color: var(--guinda); color: #fff; font-weight: 600; border-radius: 8px; }
+        .btn-guinda:hover, .btn-guinda:focus { background: var(--guinda-oscuro); border-color: var(--guinda-oscuro); color: #fff; }
+        .btn-suave { background: var(--guinda-suave); border: 1px solid #ead7e0; color: var(--guinda); font-weight: 600; border-radius: 8px; }
+        .btn-suave:hover { background: #efdfe7; color: var(--guinda-oscuro); }
+        .btn-borde { border: 1px solid #d8d2d5; background: #fff; color: var(--tinta-2); font-weight: 600; border-radius: 8px; }
+        .btn-borde:hover { border-color: var(--mal); color: var(--mal); background: #fff; }
+
+        /* ---------- Indicadores ---------- */
+        .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+        .kpi { background: #fff; border: 1px solid var(--linea); border-radius: 12px; padding: 14px 16px; }
+        .kpi-label { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--gris); }
+        .kpi-valor { display: block; font-family: var(--serif); font-size: 24px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums lining-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .kpi-nota { font-size: 12px; color: var(--gris); }
+        .kpi.neg .kpi-valor { color: var(--mal); }
+        .kpi.destacado { background: var(--guinda); border-color: var(--guinda); color: #fff; }
+        .kpi.destacado .kpi-label, .kpi.destacado .kpi-nota { color: rgba(255,255,255,.78); }
+        .kpi.destacado.neg .kpi-valor { color: #ffd2cf; }
+
+        /* ---------- Barra de pestañas ---------- */
+        .barra { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+        .pestanas { display: inline-flex; background: #e9e5e7; border-radius: 10px; padding: 4px; gap: 2px; }
+        .pestana { border: 0; background: transparent; padding: 7px 14px; border-radius: 7px; font-size: 14px; font-weight: 600; color: var(--tinta-2); }
+        .pestana:hover { color: var(--tinta); }
+        .pestana.active { background: #fff; color: var(--guinda); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+        .contador { display: inline-block; min-width: 20px; padding: 0 6px; margin-left: 4px; border-radius: 10px; background: rgba(0,0,0,.08); font-size: 12px; text-align: center; }
+        .pestana.active .contador { background: var(--guinda-suave); }
+        .barra-der { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+        .form-switch .form-check-input:checked { background-color: var(--guinda); border-color: var(--guinda); }
+        .form-check-label { font-size: 13.5px; color: var(--tinta-2); }
+
+        /* ---------- Hoja: el estado de resultados en formato clásico ---------- */
+        .hoja {
+            background: var(--papel); max-width: 1000px; margin: 0 auto;
+            padding: 52px 56px 48px; border: 1px solid #e8e2dc; border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 12px 32px -12px rgba(60,30,40,.18);
+            font-family: var(--serif); color: var(--tinta);
+        }
+        .hoja-encabezado { text-align: center; padding-bottom: 14px; margin-bottom: 20px; border-bottom: 3px double var(--tinta); }
+        .hoja-empresa { font-size: 21px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; margin: 0; }
+        .hoja-titulo { font-size: 16.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin: 4px 0 2px; }
+        .hoja-periodo { font-size: 14.5px; text-transform: uppercase; letter-spacing: .02em; margin: 0; }
+        .hoja-cifras { font-size: 12.5px; font-style: italic; color: var(--gris); margin: 2px 0 0; }
+
+        .hoja-tabla { overflow-x: auto; }
+        table.estado { width: 100%; border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums lining-nums; }
+        table.estado td { padding: 2px 0; vertical-align: bottom; }
+        table.estado tr:hover td { background: rgba(108,29,69,.035); }
+        td.concepto { padding-right: 10px !important; }
+        td.concepto.s1 { padding-left: 1.4rem; }
+        td.concepto.s2 { padding-left: 2.8rem; }
+        td.monto { width: 8.6rem; padding-left: .9rem !important; }
+        td.monto .m { display: flex; align-items: baseline; padding-bottom: 2px; }
+        td.monto .pesos { padding-right: 6px; }
+        td.monto .cifra { margin-left: auto; white-space: nowrap; }
+        td.monto .cifra:not(.neg)::after { content: ')'; visibility: hidden; }   /* alinea los dígitos con los negativos (…) */
+        td.raya-simple .m { border-bottom: 1px solid var(--tinta); }
+        td.raya-doble .m { border-bottom: 3.5px double var(--tinta); }
+
+        tr.fila-grupo td.concepto { padding-top: 6px; }
+        tr.fila-grupo td.concepto::after { content: ':'; }
+        tr.fila-grupo td.concepto.s0 { font-weight: 700; }
+        tr.fila-resultado td { font-weight: 700; }
+        tr.fila-total td { font-weight: 700; text-transform: uppercase; letter-spacing: .03em; padding-top: 8px; }
+        tr.fila-total td.monto { padding-bottom: 4px; }
+
+        td.coment { display: none; width: 18%; padding-right: 12px !important; font-family: var(--sans); font-style: italic; font-size: 12.5px; color: var(--gris); }
+        .con-comentarios td.coment { display: table-cell; }
+
+        /* ---------- Movimientos ---------- */
+        .tabla-mov { background: #fff; border: 1px solid var(--linea); border-radius: 12px; overflow: hidden; }
+        .tabla-mov table { margin: 0; font-size: 14px; }
+        .tabla-mov thead th { background: #faf8f9; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--gris); border-bottom: 1px solid var(--linea); padding: 10px 14px; }
+        .tabla-mov td { padding: 10px 14px; border-color: #f0ecee; }
+        .tabla-mov .num { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+        .chip { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+        .chip-ventas    { background: #e6f4ec; color: #22663f; }
+        .chip-costo     { background: #fdeee2; color: #8a4a12; }
+        .chip-operacion { background: #e6f0fb; color: #1d4f8a; }
+        .chip-otros     { background: #efe9fb; color: #4d2f8a; }
+        .chip-fuera     { background: #f1eff0; color: #77707a; }
+        .sub { font-size: 12.5px; color: var(--gris); margin-left: 4px; }
+        .fuera { color: var(--mal); font-size: 12px; margin-left: 6px; }
+        .btn-icono { border: 0; background: transparent; color: #a59ca1; width: 32px; height: 32px; border-radius: 8px; }
+        .btn-icono:hover { background: var(--mal-suave); color: var(--mal); }
+        .vacio { padding: 48px 24px; text-align: center; color: var(--gris); }
+        .vacio i { font-size: 32px; color: #cfc6cb; display: block; margin-bottom: 8px; }
+
+        .modal-content { border-radius: 14px; border: 0; }
+        .icono-peligro { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: var(--mal-suave); color: var(--mal); font-size: 20px; margin-bottom: 14px; }
+        .resumen-mov { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border: 1px solid var(--linea); border-radius: 10px; background: #faf8f9; }
+        .resumen-mov .num { font-family: var(--serif); font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .toast { border-radius: 10px; border: 0; box-shadow: 0 8px 24px rgba(0,0,0,.15); }
+
+        @media (max-width: 1279px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 991px) {
+            .layout { grid-template-columns: minmax(0, 1fr); padding: 16px; }
+            .panel { position: static; }
+            .topbar-meta { display: none; }
+        }
+        @media (max-width: 640px) {
+            .hoja { padding: 26px 14px; }
+            table.estado { font-size: 13px; min-width: 620px; }
+            td.monto { width: 6.4rem; padding-left: .5rem !important; }
+            .barra-der { margin-left: 0; width: 100%; justify-content: space-between; }
+            .kpi-valor { font-size: 19px; }
+        }
     </style>
 </head>
 <body>
 
-<nav class="navbar bg-guinda mb-4 shadow-sm">
-    <div class="container-fluid justify-content-center">
-        <span class="navbar-brand mb-0 h4 fw-bold">Sistema Contable Avanzado - IPN</span>
+<header class="topbar">
+    <div class="topbar-inner">
+        <div class="sello">Σ</div>
+        <div>
+            <div class="marca-titulo">Estado de Resultados</div>
+            <div class="marca-sub">Instituto Politécnico Nacional</div>
+        </div>
+        <div class="topbar-meta">
+            <strong class="js-empresa">NOMBRE DE LA EMPRESA</strong>
+            <span id="metaPeriodo"></span>
+        </div>
     </div>
-</nav>
+</header>
 
-<div class="container-fluid px-4">
-    <div class="row">
+<main class="layout">
 
-        <!-- Formulario Operativo -->
-        <div class="col-lg-3">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-dark text-white fw-bold">Registro Operativo</div>
-                <div class="card-body">
+    <!-- ===================== PANEL IZQUIERDO ===================== -->
+    <aside class="panel">
 
-                    <!-- Configuración de Empresa y Periodo -->
-                    <div class="mb-4 pb-3 border-bottom">
-                        <div class="mb-2">
-                            <label class="form-label small fw-bold">Nombre de la Empresa</label>
-                            <input type="text" id="nombreEmpresa" class="form-control form-control-sm" placeholder="Ej. Comercializadora S.A." onkeyup="actualizarEncabezado()">
+        <section class="tarjeta">
+            <h2 class="tarjeta-titulo"><i class="bi bi-building"></i>Datos del reporte</h2>
+
+            <div class="mb-2">
+                <label class="form-label" for="nombreEmpresa">Nombre de la empresa</label>
+                <input type="text" id="nombreEmpresa" class="form-control" placeholder="Ej. La Comercial Mercantil, S.A." autocomplete="off">
+            </div>
+            <div class="row g-2">
+                <div class="col-6">
+                    <label class="form-label" for="fechaInicio">Del</label>
+                    <input type="date" id="fechaInicio" class="form-control">
+                </div>
+                <div class="col-6">
+                    <label class="form-label" for="fechaFin">Al</label>
+                    <input type="date" id="fechaFin" class="form-control">
+                </div>
+            </div>
+
+            <form class="tasas" th:action="@{/tasas}" method="post">
+                <label class="form-label">Tasas de impuestos</label>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text">ISR</span>
+                            <input type="number" name="isr" class="form-control" min="0" max="100" step="0.01" required
+                                   th:value="${reporte.tasaIsrTexto}" value="33">
+                            <span class="input-group-text px-2">%</span>
                         </div>
-                        <div class="row g-1 mb-3">
-                            <div class="col-6">
-                                <label class="form-label small fw-bold">Fecha Inicio</label>
-                                <input type="date" id="fechaInicio" class="form-control form-control-sm" onchange="actualizarEncabezado()">
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label small fw-bold">Fecha Fin</label>
-                                <input type="date" id="fechaFin" class="form-control form-control-sm" onchange="actualizarEncabezado()">
-                            </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text">PTU</span>
+                            <input type="number" name="ptu" class="form-control" min="0" max="100" step="0.01" required
+                                   th:value="${reporte.tasaPtuTexto}" value="10">
+                            <span class="input-group-text px-2">%</span>
                         </div>
-                        <button type="button" class="btn btn-outline-danger btn-sm w-100 fw-bold" data-bs-toggle="modal" data-bs-target="#modalReiniciar">
-                            Reiniciar / Nuevo Ejercicio
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-suave btn-sm w-100 mt-2"><i class="bi bi-check2 me-1"></i>Aplicar tasas</button>
+            </form>
+
+            <button type="button" class="btn btn-borde btn-sm w-100 mt-3" data-bs-toggle="modal" data-bs-target="#modalReiniciar">
+                <i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar / nuevo ejercicio
+            </button>
+        </section>
+
+        <section class="tarjeta">
+            <h2 class="tarjeta-titulo"><i class="bi bi-plus-circle"></i>Registrar movimiento</h2>
+
+            <form th:action="@{/guardar}" th:object="${nuevaCuenta}" method="post" id="formCuenta" novalidate>
+
+                <div class="mb-3">
+                    <div class="fila-label">
+                        <label class="form-label" for="selectorCuenta">Cuenta</label>
+                        <button type="button" class="link-nueva" data-bs-toggle="modal" data-bs-target="#modalCuenta">
+                            <i class="bi bi-plus-lg"></i> Nueva cuenta
                         </button>
                     </div>
+                    <select class="form-select" id="selectorCuenta"></select>
+                    <div class="rubro-info" id="infoRubro">Elige una cuenta del catálogo.</div>
+                    <input type="hidden" th:field="*{nombre}" id="nombreRealCuenta">
+                    <input type="hidden" th:field="*{clasificacion}" id="campoSeccion">
+                    <input type="hidden" th:field="*{subclasificacion}" id="campoRubro">
+                </div>
 
-                    <form th:action="@{/guardar}" th:object="${nuevaCuenta}" method="post" id="formCuenta" onsubmit="confirmarRegistro(event)">
+                <div class="mb-3">
+                    <label class="form-label" for="comentarios">Comentario <span class="fw-normal text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" th:field="*{comentarios}" id="comentarios" placeholder="No. de factura, concepto…" autocomplete="off">
+                </div>
 
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">Cuenta Contable</label>
-                            <select class="form-select border-dark" id="selectorCuenta" onchange="gestionarTipoCuenta()" required>
-                            </select>
-                            <div id="divCuentaNueva" class="mt-2 d-none">
-                                <input type="text" class="form-control border-primary" id="inputNuevaCuenta" placeholder="Nombre de tu nueva cuenta">
-                            </div>
-                            <input type="hidden" th:field="*{nombre}" id="nombreRealCuenta">
-                        </div>
+                <div class="mb-3">
+                    <label class="form-label" for="importeVisual">Importe</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="text" class="form-control" id="importeVisual" inputmode="decimal" placeholder="150,000.00" autocomplete="off">
+                    </div>
+                    <input type="hidden" th:field="*{importe}" id="importeReal">
+                </div>
 
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">Clasificación</label>
-                            <select class="form-select" th:field="*{clasificacion}" id="selectClasificacion" required>
-                                <option value="Activo">Activo</option>
-                                <option value="Pasivo">Pasivo</option>
-                                <option value="Capital">Capital Contable</option>
-                                <option value="Ingreso">Ingreso (Ventas)</option>
-                                <option value="Egreso">Egreso (Gastos/Costos)</option>
-                            </select>
-                        </div>
+                <button type="submit" class="btn btn-guinda w-100" id="btnRegistrar">
+                    <i class="bi bi-check2 me-1"></i>Registrar movimiento
+                </button>
+            </form>
+        </section>
+    </aside>
 
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">Subclasificación</label>
-                            <select class="form-select" th:field="*{subclasificacion}" id="selectSubclasificacion">
-                                <option value="Circulante">Circulante</option>
-                                <option value="No Circulante">No Circulante</option>
-                                <option value="Ventas">Ventas (Resultados)</option>
-                                <option value="Costo">Costo de Ventas (Resultados)</option>
-                                <option value="Gasto">Gasto Operativo (Resultados)</option>
-                            </select>
-                        </div>
+    <!-- ===================== CONTENIDO ===================== -->
+    <section>
 
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">Comentarios / Detalle (Opcional)</label>
-                            <input type="text" class="form-control" th:field="*{comentarios}" placeholder="Número de factura, concepto...">
-                        </div>
+        <div class="kpis">
+            <div class="kpi">
+                <span class="kpi-label">Ventas netas</span>
+                <span class="kpi-valor" th:text="${'$' + #numbers.formatDecimal(reporte.ventasNetas, 1, 'COMMA', 2, 'POINT')}">$0.00</span>
+            </div>
+            <div class="kpi">
+                <span class="kpi-label">Costo de lo vendido</span>
+                <span class="kpi-valor" th:text="${'$' + #numbers.formatDecimal(reporte.costoVendido, 1, 'COMMA', 2, 'POINT')}">$0.00</span>
+            </div>
+            <div class="kpi" th:classappend="${reporte.utilidadOperacion < 0} ? 'neg'">
+                <span class="kpi-label" th:text="${reporte.utilidadOperacion < 0} ? 'Pérdida de operación' : 'Utilidad de operación'">Utilidad de operación</span>
+                <span class="kpi-valor" th:text="${'$' + #numbers.formatDecimal(reporte.utilidadOperacion, 1, 'COMMA', 2, 'POINT')}">$0.00</span>
+            </div>
+            <div class="kpi destacado" th:classappend="${reporte.utilidadNeta < 0} ? 'neg'">
+                <span class="kpi-label" th:text="${reporte.utilidadNeta < 0} ? 'Pérdida neta' : 'Utilidad neta'">Utilidad neta</span>
+                <span class="kpi-valor" th:text="${'$' + #numbers.formatDecimal(reporte.utilidadNeta, 1, 'COMMA', 2, 'POINT')}">$0.00</span>
+                <span class="kpi-nota" th:text="${'Margen neto: ' + reporte.margenNetoTexto}">Margen neto</span>
+            </div>
+        </div>
 
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold">Importe ($)</label>
-                            <input type="text" class="form-control" id="importeVisual" placeholder="150,000.00" onkeyup="formatearMoneda(this)" required>
-                            <input type="hidden" th:field="*{importe}" id="importeReal">
-                        </div>
+        <div class="barra">
+            <nav class="pestanas" role="tablist">
+                <button class="pestana active" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#pane-ER">Estado de resultados</button>
+                <button class="pestana" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#pane-MOV">
+                    Movimientos <span class="contador" th:text="${#lists.size(cuentas)}">0</span>
+                </button>
+            </nav>
 
-                        <button type="submit" class="btn bg-guinda w-100 fw-bold">Registrar Movimiento</button>
+            <div class="barra-der">
+                <div class="form-check form-switch m-0">
+                    <input class="form-check-input" type="checkbox" role="switch" id="toggleComentarios">
+                    <label class="form-check-label" for="toggleComentarios">Comentarios</label>
+                </div>
+                <button class="btn btn-guinda" type="button" id="btnPDF">
+                    <i class="bi bi-file-earmark-pdf me-1"></i>Exportar PDF
+                </button>
+            </div>
+        </div>
+
+        <div class="tab-content">
+
+            <!-- Estado de resultados: mismas líneas que el PDF -->
+            <div class="tab-pane fade show active" id="pane-ER" role="tabpanel">
+                <article class="hoja">
+                    <header class="hoja-encabezado">
+                        <p class="hoja-empresa js-empresa">NOMBRE DE LA EMPRESA</p>
+                        <h3 class="hoja-titulo" th:text="${estado.titulo}">Estado de Resultados</h3>
+                        <p class="hoja-periodo js-periodo"></p>
+                        <p class="hoja-cifras">(Cifras en pesos mexicanos)</p>
+                    </header>
+
+                    <div class="hoja-tabla">
+                        <table class="estado">
+                            <tbody>
+                            <tr th:each="l : ${estado.lineas}" th:class="${'fila-' + l.estilo}">
+                                <td class="concepto" th:classappend="${'s' + l.sangria}" th:text="${l.concepto}">Concepto</td>
+                                <td class="coment" th:text="${l.comentario}"></td>
+                                <td class="monto" th:each="c : ${l.celdas}"
+                                    th:classappend="${c != null and c.subrayado != null} ? ${'raya-' + c.subrayado}">
+                                    <div class="m" th:if="${c != null}">
+                                        <span class="pesos" th:if="${c.pesos}">$</span>
+                                        <span class="cifra" th:classappend="${c.negativo} ? 'neg'" th:text="${c.texto}">0.00</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+            </div>
+
+            <!-- Movimientos registrados -->
+            <div class="tab-pane fade" id="pane-MOV" role="tabpanel">
+                <div class="tabla-mov">
+                    <div class="vacio" th:if="${#lists.isEmpty(cuentas)}">
+                        <i class="bi bi-journal-text"></i>
+                        Aún no hay movimientos. Registra el primero en el panel de la izquierda.
+                    </div>
+                    <div class="table-responsive" th:unless="${#lists.isEmpty(cuentas)}">
+                        <table class="table align-middle">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Cuenta</th>
+                                <th>Rubro</th>
+                                <th>Comentario</th>
+                                <th class="text-end">Importe</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="c, it : ${cuentas}">
+                                <td class="text-muted" th:text="${it.count}">1</td>
+                                <td>
+                                    <span class="fw-semibold" th:text="${c.nombre}">Compras</span>
+                                    <span class="fuera" th:if="${fuera.contains(c.id)}" title="Este movimiento es de una versión anterior y no entra al estado de resultados">
+                                        <i class="bi bi-exclamation-circle"></i> no aparece en el estado
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="chip" th:classappend="${colores.get(c.clasificacion) ?: 'chip-fuera'}" th:text="${c.clasificacion}">Costo de ventas</span>
+                                    <span class="sub" th:text="${c.subclasificacion}">Compras</span>
+                                </td>
+                                <td class="text-muted small" th:text="${c.comentarios}"></td>
+                                <td class="text-end num" th:text="${'$' + #numbers.formatDecimal(c.importe, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                                <td class="text-end">
+                                    <button type="button" class="btn-icono" title="Eliminar"
+                                            data-bs-toggle="modal" data-bs-target="#modalEliminar"
+                                            th:data-url="@{/eliminar/{id}(id=${c.id})}"
+                                            th:data-nombre="${c.nombre}"
+                                            th:data-detalle="${c.subclasificacion}"
+                                            th:data-importe="${'$' + #numbers.formatDecimal(c.importe, 1, 'COMMA', 2, 'POINT')}">
+                                        <i class="bi bi-trash3"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- MODAL: Nueva cuenta (se agrega al catálogo sin recargar la página) -->
+<div class="modal fade" id="modalCuenta" tabindex="-1" aria-labelledby="tituloModalCuenta" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content shadow" id="formNuevaCuenta" novalidate>
+            <div class="modal-body p-4">
+                <h5 class="fw-bold mb-1" id="tituloModalCuenta">Agregar cuenta al catálogo</h5>
+                <p class="text-muted small mb-3">Después la eliges en “Cuenta” y registras su importe.</p>
+
+                <div class="mb-3">
+                    <label class="form-label" for="inputNuevaCuenta">Nombre de la cuenta</label>
+                    <input type="text" class="form-control" id="inputNuevaCuenta" placeholder="Ej. Fletes sobre compras" autocomplete="off">
+                    <div class="invalid-feedback">Escribe el nombre de la cuenta.</div>
+                </div>
+                <div class="mb-1">
+                    <label class="form-label" for="selectRubro">¿Dónde va en el estado de resultados?</label>
+                    <select class="form-select" id="selectRubro">
+                        <optgroup th:each="sec : ${rubros}" th:attr="label=${sec.key}">
+                            <option th:each="r : ${sec.value}" th:value="${r}" th:text="${r}">Rubro</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="ayuda">Se guarda en el catálogo de este navegador.</div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <button type="button" class="btn btn-light px-3" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-guinda px-3"><i class="bi bi-plus-lg me-1"></i>Agregar cuenta</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: Eliminar movimiento -->
+<div class="modal fade" id="modalEliminar" tabindex="-1" aria-labelledby="tituloModalEliminar" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow">
+            <div class="modal-body p-4">
+                <div class="icono-peligro"><i class="bi bi-trash3"></i></div>
+                <h5 class="fw-bold mb-1" id="tituloModalEliminar">¿Eliminar este movimiento?</h5>
+                <p class="text-muted small mb-3">Se quitará del estado de resultados. Esta acción no se puede deshacer.</p>
+
+                <div class="resumen-mov">
+                    <div>
+                        <div class="fw-semibold" id="elimNombre">Cuenta</div>
+                        <div class="small text-muted" id="elimDetalle"></div>
+                    </div>
+                    <div class="num" id="elimImporte">$0.00</div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <button type="button" class="btn btn-light px-3" data-bs-dismiss="modal">Cancelar</button>
+                    <form id="formEliminar" method="post" action="#">
+                        <button type="submit" class="btn btn-danger px-3" id="btnEliminar">
+                            <i class="bi bi-trash3 me-1"></i>Sí, eliminar
+                        </button>
                     </form>
                 </div>
             </div>
         </div>
-
-        <!-- Documentos Financieros Clásicos -->
-        <div class="col-lg-9">
-
-            <div class="d-flex justify-content-between mb-3">
-                <div>
-                    <input type="checkbox" class="form-check-input me-1" id="toggleComentarios" onchange="toggleComentarios()">
-                    <label class="form-check-label fw-bold">Mostrar columna de comentarios</label>
-                </div>
-                <button class="btn btn-outline-dark fw-bold" onclick="generarPDF()">Exportar a PDF</button>
-            </div>
-
-            <div id="documentoContable" class="report-section">
-
-                <!-- ENCABEZADO OFICIAL -->
-                <div class="text-center mb-4 border-bottom pb-3">
-                    <h3 id="etiquetaEmpresa" class="fw-bold text-uppercase mb-1">NOMBRE DE LA EMPRESA</h3>
-                    <h5 class="fw-bold text-uppercase mb-1">ESTADOS FINANCIEROS</h5>
-                    <p id="etiquetaPeriodo" class="text-muted mb-0"></p>
-                </div>
-
-                <!-- ESTADO DE RESULTADOS -->
-                <div class="text-center mb-2">
-                    <h6 class="fw-bold text-uppercase bg-light py-1 border">Estado de Resultados</h6>
-                </div>
-
-                <table class="table table-contable w-85 mx-auto mb-4" id="tablaResultados">
-                    <tbody>
-                    <tr>
-                        <td class="col-comentario">Ingresos totales</td>
-                        <td>Ventas Totales</td>
-                        <td class="text-end signo-pesos" th:text="${#numbers.formatDecimal(ventas, 1, 'COMMA', 2, 'POINT')}"></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td class="col-comentario">Valor de lo vendido</td>
-                        <td class="sangria">(-) Costo de Ventas</td>
-                        <td class="text-end corte-suma" th:text="${#numbers.formatDecimal(costos, 1, 'COMMA', 2, 'POINT')}"></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr class="fw-bold">
-                        <td class="col-comentario">Margen comercial</td>
-                        <td>= Utilidad Bruta</td>
-                        <td></td>
-                        <td class="text-end signo-pesos" th:text="${#numbers.formatDecimal(utilidadBruta, 1, 'COMMA', 2, 'POINT')}"></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td class="col-comentario">Operación del negocio</td>
-                        <td class="sangria">(-) Gastos de Operación</td>
-                        <td class="text-end corte-suma" th:text="${#numbers.formatDecimal(gastos, 1, 'COMMA', 2, 'POINT')}"></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr class="fw-bold fs-5">
-                        <td class="col-comentario">Ganancia neta del periodo</td>
-                        <td>= UTILIDAD NETA DEL EJERCICIO</td>
-                        <td></td>
-                        <td></td>
-                        <td class="text-end signo-pesos corte-final" th:text="${#numbers.formatDecimal(utilidadNeta, 1, 'COMMA', 2, 'POINT')}"></td>
-                    </tr>
-                    </tbody>
-                </table>
-
-                <!-- BALANCE GENERAL -->
-                <div class="text-center mb-2 mt-4">
-                    <h6 class="fw-bold text-uppercase bg-light py-1 border">Balance General</h6>
-                </div>
-
-                <div class="row">
-                    <!-- ACTIVO -->
-                    <div class="col-md-6 pe-4 border-end">
-                        <h6 class="fw-bold text-center border-bottom pb-2">ACTIVO</h6>
-                        <table class="table table-contable w-100" id="tablaActivo">
-                            <tbody>
-                            <tr th:each="cuenta, iterStat : ${cuentas}" th:if="${cuenta.clasificacion == 'Activo'}">
-                                <td class="col-comentario" th:text="${cuenta.comentarios}"></td>
-                                <td th:text="${cuenta.nombre}"></td>
-                                <td class="text-end" th:classappend="${iterStat.first} ? 'signo-pesos' : ''" th:text="${#numbers.formatDecimal(cuenta.importe, 1, 'COMMA', 2, 'POINT')}"></td>
-                            </tr>
-                            <tr class="fw-bold mt-2">
-                                <td class="col-comentario"></td>
-                                <td>TOTAL ACTIVO</td>
-                                <td class="text-end signo-pesos corte-final" th:text="${#numbers.formatDecimal(totalActivo, 1, 'COMMA', 2, 'POINT')}"></td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- PASIVO Y CAPITAL -->
-                    <div class="col-md-6 ps-4">
-                        <h6 class="fw-bold text-center border-bottom pb-2">PASIVO</h6>
-                        <table class="table table-contable w-100 mb-3" id="tablaPasivo">
-                            <tbody>
-                            <tr th:each="cuenta, iterStat : ${cuentas}" th:if="${cuenta.clasificacion == 'Pasivo'}">
-                                <td class="col-comentario" th:text="${cuenta.comentarios}"></td>
-                                <td th:text="${cuenta.nombre}"></td>
-                                <td class="text-end" th:classappend="${iterStat.first} ? 'signo-pesos' : ''" th:text="${#numbers.formatDecimal(cuenta.importe, 1, 'COMMA', 2, 'POINT')}"></td>
-                            </tr>
-                            <tr class="fw-bold">
-                                <td class="col-comentario"></td>
-                                <td>TOTAL PASIVO</td>
-                                <td class="text-end corte-suma" th:text="${#numbers.formatDecimal(totalPasivo, 1, 'COMMA', 2, 'POINT')}"></td>
-                            </tr>
-                            </tbody>
-                        </table>
-
-                        <h6 class="fw-bold text-center border-bottom pb-2">CAPITAL CONTABLE</h6>
-                        <table class="table table-contable w-100" id="tablaCapital">
-                            <tbody>
-                            <tr th:each="cuenta, iterStat : ${cuentas}" th:if="${cuenta.clasificacion == 'Capital'}">
-                                <td class="col-comentario" th:text="${cuenta.comentarios}"></td>
-                                <td th:text="${cuenta.nombre}"></td>
-                                <td class="text-end" th:classappend="${iterStat.first} ? 'signo-pesos' : ''" th:text="${#numbers.formatDecimal(cuenta.importe, 1, 'COMMA', 2, 'POINT')}"></td>
-                            </tr>
-                            <tr>
-                                <td class="col-comentario">Traspaso del Edo. de Resultados</td>
-                                <td>Utilidad Neta del Ejercicio</td>
-                                <td class="text-end" th:text="${#numbers.formatDecimal(utilidadNeta, 1, 'COMMA', 2, 'POINT')}"></td>
-                            </tr>
-                            <tr class="fw-bold">
-                                <td class="col-comentario"></td>
-                                <td>SUMA PASIVO Y CAPITAL</td>
-                                <td class="text-end signo-pesos corte-final" th:text="${#numbers.formatDecimal(totalPasivo + totalCapital + utilidadNeta, 1, 'COMMA', 2, 'POINT')}"></td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- PANEL DE DIAGNÓSTICO DINÁMICO CONTABLE -->
-                <div class="alert mt-4 text-center fw-bold html2pdf__exclude" id="panelDiagnostico"
-                     th:classappend="${ecuacionValida} ? 'alert-success' : 'alert-danger'">
-                    <span id="textoDiagnostico" th:text="${ecuacionValida} ? 'Ecuacion Contable Cuadrada correctamente.' : 'Atencion: Descuadre detectado en la Ecuacion Contable (Activo != Pasivo + Capital + Utilidad). Verifique que sus cuentas de capital, pasivos o ingresos esten registradas correctamente.'"></span>
-                </div>
-
-                <!-- PIE DE FIRMAS OFICIAL -->
-                <div class="row mt-4 pt-3 text-center">
-                    <div class="col-4">
-                        <div class="signature-line">
-                            <p class="fw-bold small mb-0">Elaboró</p>
-                            <p class="small text-muted">Contador General</p>
-                        </div>
-                    </div>
-                    <div class="col-4">
-                        <div class="signature-line">
-                            <p class="fw-bold small mb-0">Revisó</p>
-                            <p class="small text-muted">Auditor Interno</p>
-                        </div>
-                    </div>
-                    <div class="col-4">
-                        <div class="signature-line">
-                            <p class="fw-bold small mb-0">Autorizó</p>
-                            <p class="small text-muted">Director General</p>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
     </div>
 </div>
 
-<!-- MODAL: Confirmación de Registro -->
-<div class="modal fade" id="modalRegistro" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-body text-center p-5">
-                <h3 class="text-success mb-3">Movimiento Registrado</h3>
-                <p class="text-muted">Los saldos se han actualizado correctamente en el sistema.</p>
-                <div class="spinner-border text-success mt-2" role="status"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL: Reiniciar Ejercicio -->
+<!-- MODAL: Reiniciar ejercicio -->
 <div class="modal fade" id="modalReiniciar" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-body text-center p-4">
-                <h4 class="text-danger mb-3">Iniciar Nuevo Ejercicio</h4>
-                <p class="text-muted small">Esto eliminará todas las cuentas actuales de la base de datos para comenzar desde cero.</p>
-                <div class="d-flex justify-content-center gap-3 mt-4">
-                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancelar</button>
+        <div class="modal-content shadow">
+            <div class="modal-body p-4">
+                <h5 class="fw-bold mb-2">¿Iniciar un nuevo ejercicio?</h5>
+                <p class="text-muted mb-4">Se eliminarán todos los movimientos registrados para empezar desde cero. Esta acción no se puede deshacer.</p>
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-light px-3" data-bs-dismiss="modal">Cancelar</button>
                     <form th:action="@{/reiniciar}" method="post">
-                        <button type="submit" class="btn btn-danger px-4">Si, Reiniciar</button>
+                        <button type="submit" class="btn btn-danger px-3">Sí, reiniciar</button>
                     </form>
                 </div>
             </div>
@@ -306,191 +493,527 @@
     </div>
 </div>
 
-<!-- MODAL: Generando PDF -->
-<div class="modal fade" id="modalPDF" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-body text-center p-5">
-                <h3 class="text-danger mb-3">Exportando Documento</h3>
-                <p class="text-muted">Generando el reporte financiero oficial...</p>
-                <div class="spinner-grow text-danger mt-2" role="status"></div>
-            </div>
+<!-- Avisos -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" id="contenedorToasts">
+    <div class="toast text-bg-dark" role="status" th:if="${mensaje}" data-auto>
+        <div class="d-flex">
+            <div class="toast-body"><i class="bi bi-check2-circle me-2"></i><span th:text="${mensaje}"></span></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+    <div class="toast text-bg-danger" role="alert" th:if="${error}" data-auto>
+        <div class="d-flex">
+            <div class="toast-body"><i class="bi bi-exclamation-triangle me-2"></i><span th:text="${error}"></span></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
-    let catalogo = JSON.parse(localStorage.getItem('catalogoCuentasIPN')) || {
-        "Activo": { "Caja": "Circulante", "Bancos": "Circulante", "Clientes": "Circulante", "Inventario Inicial": "Circulante", "Inventario Final": "Circulante", "Equipo de Cómputo": "No Circulante" },
-        "Pasivo": { "Proveedores": "Circulante", "Acreedores Diversos": "Circulante", "Impuestos por Pagar": "Circulante" },
-        "Capital": { "Capital Social": "Contable" },
-        "Ingreso": { "Ventas": "Ventas" },
-        "Egreso": { "Costo de Ventas": "Costo", "Gastos de Administración": "Gasto", "Gastos de Venta": "Gasto" }
-    };
+<script th:inline="javascript">
+    const URL_REPORTE = /*[[@{/api/reporte}]]*/ '/api/reporte';
+</script>
 
-    function cargarSelectCuentas() {
-        const select = document.getElementById('selectorCuenta');
-        select.innerHTML = '<option value="" disabled selected>Seleccione una cuenta...</option>';
+<!-- ================= Motor del PDF (formato contable clásico) ================= -->
+<script th:inline="none">
+    // PDF-ENGINE-START
+    const PDFContable = (() => {
+        const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
+            'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 
-        for (let clasificacion in catalogo) {
-            let optgroup = document.createElement('optgroup');
-            optgroup.label = clasificacion;
-            for (let nombreCuenta in catalogo[clasificacion]) {
-                let option = document.createElement('option');
-                option.value = nombreCuenta;
-                option.text = nombreCuenta;
-                option.dataset.cls = clasificacion;
-                option.dataset.sub = catalogo[clasificacion][nombreCuenta];
-                optgroup.appendChild(option);
+        // Márgenes y medidas en milímetros (hoja carta)
+        const M = { izq: 18, der: 18, sup: 16, inf: 16 };
+        const ANCHO_COL = 25.5, SEP_COL = 2.5, ALTO_LINEA = 5.6, SANGRIA = 4.5;
+        const FUENTE = 'times', TAM = 10.5;
+
+        function partes(iso) {
+            if (!iso) return null;
+            const [a, m, d] = iso.split('-').map(Number);
+            return { a, m, d };
+        }
+
+        function fechaLarga(iso) {
+            const p = partes(iso);
+            return p ? `${p.d} de ${MESES[p.m - 1]} de ${p.a}` : '';
+        }
+
+        /** "Del 1 de enero al 31 de diciembre de 2025" */
+        function periodo(inicio, fin) {
+            const i = partes(inicio), f = partes(fin);
+            if (i && f) {
+                if (i.a === f.a && i.m === f.m) return `Del ${i.d} al ${f.d} de ${MESES[f.m - 1]} de ${f.a}`;
+                if (i.a === f.a) return `Del ${i.d} de ${MESES[i.m - 1]} al ${fechaLarga(fin)}`;
+                return `Del ${fechaLarga(inicio)} al ${fechaLarga(fin)}`;
             }
-            select.appendChild(optgroup);
+            if (f) return `Al ${fechaLarga(fin)}`;
+            if (i) return `A partir del ${fechaLarga(inicio)}`;
+            return '';
         }
 
-        let optionCustom = document.createElement('option');
-        optionCustom.value = "CUSTOM";
-        optionCustom.text = "Agregar nueva cuenta...";
-        optionCustom.className = "fw-bold text-primary";
-        select.appendChild(optionCustom);
-    }
-    cargarSelectCuentas();
+        function encabezado(doc, estado, meta, continuacion) {
+            const W = doc.internal.pageSize.getWidth();
+            const centro = W / 2, ancho = W - M.izq - M.der;
+            let y = M.sup + 4;
+            doc.setTextColor(25, 22, 24);
 
-    function gestionarTipoCuenta() {
-        const select = document.getElementById('selectorCuenta');
-        const divNueva = document.getElementById('divCuentaNueva');
-        const inputNueva = document.getElementById('inputNuevaCuenta');
-        const selectCls = document.getElementById('selectClasificacion');
-        const selectSub = document.getElementById('selectSubclasificacion');
-
-        if (select.value === "CUSTOM") {
-            divNueva.classList.remove('d-none');
-            inputNueva.required = true;
-            selectCls.style.pointerEvents = 'auto';
-            selectSub.style.pointerEvents = 'auto';
-            selectCls.style.backgroundColor = 'white';
-            selectSub.style.backgroundColor = 'white';
-        } else {
-            divNueva.classList.add('d-none');
-            inputNueva.required = false;
-            const selectedOption = select.options[select.selectedIndex];
-            selectCls.value = selectedOption.dataset.cls;
-            selectSub.value = selectedOption.dataset.sub;
-
-            selectCls.style.pointerEvents = 'none';
-            selectSub.style.pointerEvents = 'none';
-            selectCls.style.backgroundColor = '#e9ecef';
-            selectSub.style.backgroundColor = '#e9ecef';
-        }
-    }
-
-    function confirmarRegistro(event) {
-        event.preventDefault();
-
-        const select = document.getElementById('selectorCuenta');
-        const inputNueva = document.getElementById('inputNuevaCuenta');
-        const nombreReal = document.getElementById('nombreRealCuenta');
-        const cls = document.getElementById('selectClasificacion').value;
-        const sub = document.getElementById('selectSubclasificacion').value;
-
-        if (select.value === "CUSTOM") {
-            let nuevoNombre = inputNueva.value.trim();
-            nombreReal.value = nuevoNombre;
-            if (!catalogo[cls]) catalogo[cls] = {};
-            catalogo[cls][nuevoNombre] = sub;
-            localStorage.setItem('catalogoCuentasIPN', JSON.stringify(catalogo));
-        } else {
-            nombreReal.value = select.value;
-        }
-
-        document.getElementById('selectClasificacion').style.pointerEvents = 'auto';
-        document.getElementById('selectSubclasificacion').style.pointerEvents = 'auto';
-
-        var modal = new bootstrap.Modal(document.getElementById('modalRegistro'));
-        modal.show();
-
-        setTimeout(() => {
-            document.getElementById('formCuenta').submit();
-        }, 1000);
-    }
-
-    function formatearMoneda(input) {
-        let valorLimpio = input.value.replace(/[^0-9.]/g, '');
-        if (valorLimpio !== '') {
-            let partes = valorLimpio.split('.');
-            partes[0] = parseInt(partes[0]).toLocaleString('en-US');
-            input.value = partes.join('.');
-            document.getElementById('importeReal').value = valorLimpio;
-        } else {
-            document.getElementById('importeReal').value = '';
-        }
-    }
-
-    function formatearFecha(fechaStr) {
-        if (!fechaStr) return '';
-        const partes = fechaStr.split('-');
-        return `${partes[2]}/${partes[1]}/${partes[0]}`;
-    }
-
-    function actualizarEncabezado() {
-        const empresa = document.getElementById('nombreEmpresa').value.trim();
-        const inicio = document.getElementById('fechaInicio').value;
-        const fin = document.getElementById('fechaFin').value;
-
-        let textoPeriodo = '';
-        if (inicio && fin) {
-            textoPeriodo = `Del ${formatearFecha(inicio)} al ${formatearFecha(fin)}`;
-        } else if (inicio) {
-            textoPeriodo = `A partir del ${formatearFecha(inicio)}`;
-        }
-
-        document.getElementById('etiquetaEmpresa').innerText = empresa ? empresa : 'NOMBRE DE LA EMPRESA';
-        document.getElementById('etiquetaPeriodo').innerText = textoPeriodo;
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const hoy = new Date();
-        const yyyy = hoy.getFullYear();
-        const mm = String(hoy.getMonth() + 1).padStart(2, '0');
-        const dd = String(hoy.getDate()).padStart(2, '0');
-
-        document.getElementById('fechaInicio').value = `${yyyy}-${mm}-01`;
-        document.getElementById('fechaFin').value = `${yyyy}-${mm}-${dd}`;
-        actualizarEncabezado();
-    });
-
-    function toggleComentarios() {
-        const tabla = document.getElementById('documentoContable');
-        if(document.getElementById('toggleComentarios').checked) {
-            tabla.classList.add('mostrar-comentarios');
-        } else {
-            tabla.classList.remove('mostrar-comentarios');
-        }
-    }
-
-    function generarPDF() {
-        var modal = new bootstrap.Modal(document.getElementById('modalPDF'));
-        modal.show();
-
-        setTimeout(() => {
-            const elemento = document.getElementById('documentoContable');
-            const empresaLimpia = (document.getElementById('nombreEmpresa').value.trim() || 'Empresa').replace(/\s+/g, '_');
-            const inicio = document.getElementById('fechaInicio').value || 'inicio';
-            const fin = document.getElementById('fechaFin').value || 'fin';
-
-            const nombreArchivo = `Estado_financiero_de_${empresaLimpia}_del_${inicio}_al_${fin}.pdf`;
-
-            html2pdf().set({
-                margin: [10, 10, 15, 10],
-                filename: nombreArchivo,
-                image: { type: 'jpeg', quality: 1.0 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            }).from(elemento).save().then(() => {
-                modal.hide();
+            doc.setFont(FUENTE, 'bold');
+            doc.setFontSize(14);
+            doc.splitTextToSize((meta.empresa || 'Nombre de la empresa').toUpperCase(), ancho).forEach(t => {
+                doc.text(t, centro, y, { align: 'center' });
+                y += 6;
             });
-        }, 1500);
-    }
+
+            y += 0.5;
+            doc.setFontSize(12);
+            doc.text(estado.titulo.toUpperCase() + (continuacion ? ' (CONTINUACIÓN)' : ''), centro, y, { align: 'center' });
+            y += 5.6;
+
+            const per = periodo(meta.inicio, meta.fin);
+            if (per) {
+                doc.setFont(FUENTE, 'normal');
+                doc.setFontSize(11);
+                doc.text(per.toUpperCase(), centro, y, { align: 'center' });
+                y += 5;
+            }
+
+            doc.setFont(FUENTE, 'italic');
+            doc.setFontSize(9.5);
+            doc.setTextColor(95, 90, 93);
+            doc.text('(Cifras en pesos mexicanos)', centro, y, { align: 'center' });
+            doc.setTextColor(25, 22, 24);
+            y += 4;
+
+            // Doble raya bajo el encabezado
+            doc.setDrawColor(25, 22, 24);
+            doc.setLineWidth(0.55);
+            doc.line(M.izq, y, W - M.der, y);
+            doc.setLineWidth(0.2);
+            doc.line(M.izq, y + 0.9, W - M.der, y + 0.9);
+            return y + 8;
+        }
+
+        function fuenteLinea(doc, l, esc) {
+            const negrita = l.estilo === 'resultado' || l.estilo === 'total' || (l.estilo === 'grupo' && l.sangria === 0);
+            doc.setFont(FUENTE, negrita ? 'bold' : 'normal');
+            doc.setFontSize(TAM * Math.max(esc, 0.9));
+        }
+
+        function espacioAntes(l, idx) {
+            if (idx === 0) return 0;
+            if (l.estilo === 'grupo') return 0.8;
+            if (l.estilo === 'total') return 1.4;
+            return 0;
+        }
+
+        function textoConcepto(l) {
+            if (l.estilo === 'total') return l.concepto.toUpperCase();
+            if (l.estilo === 'grupo') return l.concepto + ':';
+            return l.concepto;
+        }
+
+        function dibujarEstado(doc, estado, meta) {
+            const W = doc.internal.pageSize.getWidth();
+            const H = doc.internal.pageSize.getHeight();
+            const n = estado.numColumnas;
+            const derecha = i => W - M.der - (n - 1 - i) * (ANCHO_COL + SEP_COL);
+            const izquierda = i => derecha(i) - ANCHO_COL;
+            const anchoConcepto = izquierda(0) - 3 - M.izq;
+            const limite = H - M.inf - 10;   // deja lugar para el número de página
+
+            let y = encabezado(doc, estado, meta, false);
+
+            // Mide el estado y, si no cabe en una hoja, compacta el interlineado (hasta 72 %)
+            const extraComentario = esc => Math.max(0, 7.6 - ALTO_LINEA * esc);
+            const medir = esc => estado.lineas.reduce((total, l, idx) => {
+                fuenteLinea(doc, l, esc);
+                const r = doc.splitTextToSize(textoConcepto(l), anchoConcepto - l.sangria * SANGRIA).length;
+                const c = (meta.comentarios && l.comentario) ? extraComentario(esc) : 0;
+                return total + espacioAntes(l, idx) * esc + r * ALTO_LINEA * esc + c;
+            }, 0);
+            const disponible = limite - y - 1;
+            let esc = 1;
+            if (medir(1) > disponible) {
+                for (let k = 0; k < 6; k++) esc = Math.max(0.72, esc * disponible / medir(esc));
+            }
+            const altoLinea = ALTO_LINEA * esc;
+
+            estado.lineas.forEach((l, idx) => {
+                y += espacioAntes(l, idx) * esc;
+
+                const sangria = l.sangria * SANGRIA;
+                fuenteLinea(doc, l, esc);
+                const renglones = doc.splitTextToSize(textoConcepto(l), anchoConcepto - sangria);
+
+                doc.setFontSize(8);
+                const comentario = (meta.comentarios && l.comentario)
+                    ? doc.splitTextToSize(l.comentario, anchoConcepto - sangria) : [];
+                const alto = renglones.length * altoLinea + comentario.length * 3.6;
+
+                if (y + alto > limite) {
+                    doc.addPage();
+                    y = encabezado(doc, estado, meta, true);
+                }
+
+                // Concepto
+                fuenteLinea(doc, l, esc);
+                doc.setTextColor(25, 22, 24);
+                renglones.forEach((t, k) => doc.text(t, M.izq + sangria, y + k * altoLinea));
+                const yCifra = y + (renglones.length - 1) * altoLinea;
+
+                // Importes por columna
+                const anchoParentesis = doc.getTextWidth(')');
+                (l.celdas || []).forEach((c, i) => {
+                    if (!c) return;
+                    const xd = derecha(i), xi = izquierda(i);
+                    doc.text(c.texto, c.negativo ? xd : xd - anchoParentesis, yCifra, { align: 'right' });
+                    if (c.pesos) doc.text('$', xi + 0.8, yCifra);
+                    if (c.subrayado) {
+                        const yr = yCifra + 1.5 * Math.max(esc, 0.9);
+                        doc.setDrawColor(25, 22, 24);
+                        doc.setLineWidth(0.25);
+                        doc.line(xi + 0.5, yr, xd, yr);
+                        if (c.subrayado === 'doble') doc.line(xi + 0.5, yr + 0.85, xd, yr + 0.85);
+                    }
+                });
+                y += renglones.length * altoLinea;
+
+                // Comentario opcional (pequeño, gris, bajo el concepto)
+                if (comentario.length) {
+                    doc.setFont(FUENTE, 'italic');
+                    doc.setFontSize(8);
+                    doc.setTextColor(110, 104, 108);
+                    comentario.forEach((t, k) => doc.text(t, M.izq + sangria + 2, yCifra + 3.4 + k * 3.2));
+                    y = Math.max(y, yCifra + 3.4 + (comentario.length - 1) * 3.2 + 4.2);
+                    doc.setTextColor(25, 22, 24);
+                }
+            });
+        }
+
+        function numerarPaginas(doc) {
+            const total = doc.getNumberOfPages();
+            const W = doc.internal.pageSize.getWidth();
+            const H = doc.internal.pageSize.getHeight();
+            for (let p = 1; p <= total; p++) {
+                doc.setPage(p);
+                doc.setFont(FUENTE, 'normal');
+                doc.setFontSize(8.5);
+                doc.setTextColor(130, 124, 128);
+                doc.text(`Página ${p} de ${total}`, W / 2, H - 9, { align: 'center' });
+            }
+        }
+
+        function crear(reporte, meta) {
+            const doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'letter', orientation: 'portrait' });
+            dibujarEstado(doc, reporte.estadoResultados, meta);
+            numerarPaginas(doc);
+            doc.setProperties({
+                title: 'Estado de Resultados - ' + (meta.empresa || 'Empresa'),
+                creator: 'Sistema Contable IPN'
+            });
+            return doc;
+        }
+
+        function nombreArchivo(meta) {
+            const limpio = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
+                .replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+            const empresa = limpio(meta.empresa) || 'Empresa';
+            return `Estado_de_resultados_${empresa}_del_${meta.inicio || 'inicio'}_al_${meta.fin || 'fin'}.pdf`;
+        }
+
+        return { crear, nombreArchivo, periodo };
+    })();
+    // PDF-ENGINE-END
+</script>
+
+<!-- ================= Interfaz ================= -->
+<script th:inline="none">
+    (() => {
+        'use strict';
+
+        const LS_DATOS = 'datosReporteER';
+        const LS_CUENTAS = 'cuentasPersonalizadasER_v3';
+
+        // Catálogo base por rubro (los nombres de rubro son los mismos que define CuentaService)
+        const CATALOGO_BASE = {
+            'Ventas': ['Ventas'],
+            'Devoluciones y descuentos sobre ventas': ['Devoluciones sobre ventas', 'Descuentos sobre ventas', 'Rebajas sobre ventas'],
+            'Inventario inicial': ['Inventario inicial'],
+            'Compras': ['Compras'],
+            'Gastos de compra': ['Gastos de compra', 'Fletes sobre compras'],
+            'Devoluciones y descuentos sobre compras': ['Devoluciones sobre compras', 'Descuentos sobre compras', 'Rebajas sobre compras'],
+            'Inventario final': ['Inventario final'],
+            'Gastos de venta': ['Renta del almacén', 'Propaganda y publicidad', 'Sueldos de agentes y dependientes',
+                'Comisiones de agentes y dependientes', 'Consumo de luz del almacén'],
+            'Gastos de administración': ['Renta de oficinas', 'Sueldos del personal de oficinas', 'Papelería y útiles',
+                'Consumo de luz de las oficinas'],
+            'Productos financieros': ['Intereses cobrados', 'Ganancias en cambios'],
+            'Gastos financieros': ['Intereses pagados', 'Pérdida en cambios'],
+            'Otros gastos': ['Pérdida en venta de mobiliario', 'Pérdida en venta de acciones'],
+            'Otros productos': ['Comisiones cobradas', 'Dividendos cobrados']
+        };
+        const COLOR_SECCION = {
+            'Ventas': 'chip-ventas', 'Costo de ventas': 'chip-costo',
+            'Gastos de operación': 'chip-operacion', 'Otros gastos y productos': 'chip-otros'
+        };
+
+        const $ = id => document.getElementById(id);
+        const leer = (k, def) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? def; } catch (e) { return def; } };
+        const guardar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* sin almacenamiento */ } };
+        const igual = (a, b) => a.trim().toLowerCase() === b.trim().toLowerCase();
+
+        // Rubro -> sección, leído del modal (lo genera el servidor, así no se duplica la lista)
+        const selRubro = $('selectRubro');
+        const SECCION_DE = {};
+        selRubro.querySelectorAll('optgroup').forEach(g => g.querySelectorAll('option').forEach(o => { SECCION_DE[o.value] = g.label; }));
+        const RUBROS = Object.keys(SECCION_DE);
+
+        // ------------------------------------------------ Datos del reporte
+        const CAMPOS = { empresa: 'nombreEmpresa', inicio: 'fechaInicio', fin: 'fechaFin' };
+
+        function hoyISO(primerDia) {
+            const h = new Date();
+            const mm = String(h.getMonth() + 1).padStart(2, '0');
+            const dd = primerDia ? '01' : String(h.getDate()).padStart(2, '0');
+            return `${h.getFullYear()}-${mm}-${dd}`;
+        }
+
+        const datos = Object.assign({ inicio: hoyISO(true), fin: hoyISO(false), comentarios: false, pestana: '#pane-ER' },
+            leer(LS_DATOS, {}));
+
+        function datosActuales() {
+            const d = { comentarios: $('toggleComentarios').checked };
+            for (const [k, id] of Object.entries(CAMPOS)) d[k] = $(id).value.trim();
+            return d;
+        }
+
+        function formatoCorto(iso) {
+            if (!iso) return '';
+            const [a, m, d] = iso.split('-');
+            return `${d}/${m}/${a}`;
+        }
+
+        function refrescarEncabezados() {
+            const d = datosActuales();
+            document.querySelectorAll('.js-empresa').forEach(el => el.textContent = d.empresa || 'NOMBRE DE LA EMPRESA');
+            document.querySelectorAll('.js-periodo').forEach(el => el.textContent = PDFContable.periodo(d.inicio, d.fin));
+            $('metaPeriodo').textContent = (d.inicio || d.fin) ? `${formatoCorto(d.inicio)} – ${formatoCorto(d.fin)}` : '';
+            guardar(LS_DATOS, Object.assign(leer(LS_DATOS, {}), d));
+        }
+
+        for (const [k, id] of Object.entries(CAMPOS)) {
+            $(id).value = datos[k] || '';
+            $(id).addEventListener('input', refrescarEncabezados);
+        }
+
+        // ------------------------------------------------ Comentarios y pestañas
+        const toggle = $('toggleComentarios');
+        toggle.checked = !!datos.comentarios;
+        const aplicarComentarios = () => document.body.classList.toggle('con-comentarios', toggle.checked);
+        toggle.addEventListener('change', () => { aplicarComentarios(); refrescarEncabezados(); });
+        aplicarComentarios();
+        refrescarEncabezados();
+
+        document.querySelectorAll('[data-bs-toggle="tab"]').forEach(btn => {
+            btn.addEventListener('shown.bs.tab', () => {
+                guardar(LS_DATOS, Object.assign(leer(LS_DATOS, {}), { pestana: btn.dataset.bsTarget }));
+            });
+        });
+        const pestanaGuardada = document.querySelector(`[data-bs-target="${datos.pestana}"]`);
+        if (pestanaGuardada) bootstrap.Tab.getOrCreateInstance(pestanaGuardada).show();
+
+        // ------------------------------------------------ Avisos
+        function aviso(mensaje, tipo) {
+            const el = document.createElement('div');
+            el.className = `toast text-bg-${tipo === 'error' ? 'danger' : tipo === 'alerta' ? 'warning' : 'dark'}`;
+            el.setAttribute('role', 'status');
+            el.innerHTML = '<div class="d-flex"><div class="toast-body"></div>' +
+                '<button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button></div>';
+            el.querySelector('.toast-body').textContent = mensaje;
+            if (tipo !== 'alerta') el.querySelector('.btn-close').classList.add('btn-close-white');
+            $('contenedorToasts').appendChild(el);
+            el.addEventListener('hidden.bs.toast', () => el.remove());
+            bootstrap.Toast.getOrCreateInstance(el, { delay: 4000 }).show();
+        }
+        document.querySelectorAll('.toast[data-auto]').forEach(t => bootstrap.Toast.getOrCreateInstance(t, { delay: 3500 }).show());
+
+        // ------------------------------------------------ Catálogo de cuentas
+        const selector = $('selectorCuenta');
+        const infoRubro = $('infoRubro');
+        const campoSeccion = $('campoSeccion');
+        const campoRubro = $('campoRubro');
+
+        function catalogo() {
+            const cat = {};
+            for (const r of RUBROS) cat[r] = [...(CATALOGO_BASE[r] || [])];
+            for (const c of leer(LS_CUENTAS, [])) {
+                if (!cat[c.rubro]) continue;
+                if (!cat[c.rubro].some(n => igual(n, c.nombre))) cat[c.rubro].push(c.nombre);
+            }
+            return cat;
+        }
+
+        function cargarSelectCuentas(seleccion) {
+            const cat = catalogo();
+            selector.innerHTML = '<option value="" disabled selected>Selecciona una cuenta…</option>';
+            for (const rubro of RUBROS) {
+                if (!cat[rubro].length) continue;
+                const grupo = document.createElement('optgroup');
+                grupo.label = rubro;
+                for (const nombre of cat[rubro]) {
+                    const op = new Option(nombre, `${rubro}||${nombre}`);
+                    op.dataset.rubro = rubro;
+                    op.dataset.nombre = nombre;
+                    grupo.appendChild(op);
+                }
+                selector.appendChild(grupo);
+            }
+            selector.appendChild(new Option('＋ Agregar cuenta nueva…', 'CUSTOM'));
+            if (seleccion) selector.value = seleccion;
+            mostrarRubro();
+        }
+
+        function mostrarRubro() {
+            const op = selector.selectedOptions[0];
+            if (!op || !op.dataset.rubro) {
+                infoRubro.textContent = 'Elige una cuenta del catálogo.';
+                campoSeccion.value = campoRubro.value = '';
+                return;
+            }
+            const seccion = SECCION_DE[op.dataset.rubro];
+            campoSeccion.value = seccion;
+            campoRubro.value = op.dataset.rubro;
+            infoRubro.innerHTML = '';
+            const chip = document.createElement('span');
+            chip.className = 'chip ' + (COLOR_SECCION[seccion] || '');
+            chip.textContent = seccion;
+            const sub = document.createElement('span');
+            sub.textContent = '› ' + op.dataset.rubro;
+            infoRubro.append(chip, sub);
+        }
+
+        let seleccionPrevia = '';
+        selector.addEventListener('focus', () => { seleccionPrevia = selector.value; });
+        selector.addEventListener('change', () => {
+            selector.classList.remove('is-invalid');
+            if (selector.value === 'CUSTOM') {
+                selector.value = seleccionPrevia || '';
+                mostrarRubro();
+                bootstrap.Modal.getOrCreateInstance($('modalCuenta')).show();
+                return;
+            }
+            seleccionPrevia = selector.value;
+            mostrarRubro();
+        });
+
+        cargarSelectCuentas();
+
+        // ------------------------------------------------ Modal: nueva cuenta
+        const modalCuenta = $('modalCuenta');
+        const inputNueva = $('inputNuevaCuenta');
+        modalCuenta.addEventListener('show.bs.modal', () => {
+            inputNueva.value = '';
+            inputNueva.classList.remove('is-invalid');
+            const op = selector.selectedOptions[0];
+            if (op && op.dataset.rubro) selRubro.value = op.dataset.rubro;   // sugiere el rubro de la cuenta actual
+        });
+        modalCuenta.addEventListener('shown.bs.modal', () => inputNueva.focus());
+        inputNueva.addEventListener('input', () => inputNueva.classList.remove('is-invalid'));
+
+        $('formNuevaCuenta').addEventListener('submit', ev => {
+            ev.preventDefault();
+            const nombre = inputNueva.value.trim().replace(/\s+/g, ' ');
+            const rubro = selRubro.value;
+            if (!nombre) { inputNueva.classList.add('is-invalid'); inputNueva.focus(); return; }
+
+            const yaExiste = catalogo()[rubro].find(n => igual(n, nombre));
+            if (!yaExiste) {
+                const propias = leer(LS_CUENTAS, []);
+                propias.push({ nombre, rubro });
+                guardar(LS_CUENTAS, propias);
+            }
+            const valor = `${rubro}||${yaExiste || nombre}`;
+            cargarSelectCuentas(valor);
+            seleccionPrevia = valor;
+            bootstrap.Modal.getOrCreateInstance(modalCuenta).hide();
+            aviso(yaExiste ? `“${yaExiste}” ya estaba en ${rubro}; la dejé seleccionada.`
+                : `Cuenta agregada: ${nombre} (${rubro}).`);
+            setTimeout(() => $('importeVisual').focus(), 350);
+        });
+
+        // ------------------------------------------------ Importe
+        const importeVisual = $('importeVisual');
+        const importeReal = $('importeReal');
+        importeVisual.addEventListener('input', () => {
+            importeVisual.classList.remove('is-invalid');
+            let v = importeVisual.value.replace(/[^0-9.]/g, '');
+            const punto = v.indexOf('.');
+            if (punto !== -1) v = v.slice(0, punto + 1) + v.slice(punto + 1).replace(/\./g, '').slice(0, 2);
+            const [entero, decimales] = v.split('.');
+            const enteroFmt = entero ? Number(entero).toLocaleString('en-US') : (decimales !== undefined ? '0' : '');
+            importeVisual.value = decimales !== undefined ? `${enteroFmt}.${decimales}` : enteroFmt;
+            const numero = parseFloat(v);
+            importeReal.value = isNaN(numero) ? '' : String(numero);
+        });
+
+        // ------------------------------------------------ Envío del movimiento
+        $('formCuenta').addEventListener('submit', ev => {
+            ev.preventDefault();
+            const op = selector.selectedOptions[0];
+            const importe = parseFloat(importeReal.value);
+            let ok = true;
+            if (!op || !op.dataset.rubro) { selector.classList.add('is-invalid'); ok = false; }
+            if (!(importe > 0)) { importeVisual.classList.add('is-invalid'); ok = false; }
+            if (!ok) return;
+
+            $('nombreRealCuenta').value = op.dataset.nombre;
+            mostrarRubro();
+            const btn = $('btnRegistrar');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Registrando…';
+            ev.target.submit();
+        });
+
+        // ------------------------------------------------ Modal: eliminar movimiento
+        const modalEliminar = $('modalEliminar');
+        modalEliminar.addEventListener('show.bs.modal', ev => {
+            const btn = ev.relatedTarget;
+            if (!btn) return;
+            $('formEliminar').action = btn.dataset.url;
+            $('elimNombre').textContent = btn.dataset.nombre || '';
+            $('elimDetalle').textContent = btn.dataset.detalle || '';
+            $('elimImporte').textContent = btn.dataset.importe || '';
+            const confirmar = $('btnEliminar');
+            confirmar.disabled = false;
+            confirmar.innerHTML = '<i class="bi bi-trash3 me-1"></i>Sí, eliminar';
+        });
+        $('formEliminar').addEventListener('submit', () => {
+            const confirmar = $('btnEliminar');
+            confirmar.disabled = true;
+            confirmar.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Eliminando…';
+        });
+
+        // ------------------------------------------------ Exportar PDF
+        const btnPDF = $('btnPDF');
+        const textoBtnPDF = btnPDF.innerHTML;
+        btnPDF.addEventListener('click', async () => {
+            btnPDF.disabled = true;
+            btnPDF.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generando…';
+            try {
+                if (!window.jspdf) throw new Error('no cargó la librería jsPDF (¿sin internet?)');
+                const respuesta = await fetch(URL_REPORTE, { headers: { Accept: 'application/json' } });
+                if (!respuesta.ok) throw new Error('el servidor respondió ' + respuesta.status);
+                const reporte = await respuesta.json();
+                const meta = datosActuales();
+                PDFContable.crear(reporte, meta).save(PDFContable.nombreArchivo(meta));
+            } catch (e) {
+                aviso('No se pudo generar el PDF: ' + e.message, 'error');
+            } finally {
+                btnPDF.disabled = false;
+                btnPDF.innerHTML = textoBtnPDF;
+            }
+        });
+    })();
 </script>
 
 </body>
