@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Estado de Resultados · IPN</title>
+    <title>Balance General · IPN</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,8 +24,12 @@
             --linea: #e4dfe1;
             --fondo: #f4f2f0;
             --papel: #fffefb;
+            --bien: #1f6b43;
+            --bien-suave: #e7f4ec;
             --mal: #b3261e;
             --mal-suave: #fbeceb;
+            --aviso: #8a5a00;
+            --aviso-suave: #fff6df;
             --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
             --serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
         }
@@ -36,18 +40,19 @@
         .topbar { background: var(--guinda); color: #fff; border-bottom: 3px solid var(--guinda-oscuro); }
         .topbar-inner { max-width: 1520px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; gap: 16px; }
         .sello {
-            width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center;
+            width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; flex: none;
             background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25);
-            font-family: var(--serif); font-size: 22px; font-weight: 700;
+            font-family: var(--serif); font-size: 21px; font-weight: 700;
         }
+        .logo { width: 46px; height: 46px; flex: none; object-fit: contain; background: #fff; border-radius: 10px; padding: 4px; }
         .marca-titulo { font-weight: 700; font-size: 17px; line-height: 1.1; letter-spacing: .01em; }
         .marca-sub { font-size: 12.5px; opacity: .75; }
-        .topbar-meta { margin-left: auto; text-align: right; font-size: 13px; line-height: 1.35; }
-        .topbar-meta strong { display: block; font-size: 14px; letter-spacing: .02em; }
+        .topbar-meta { margin-left: auto; text-align: right; font-size: 13px; line-height: 1.35; min-width: 0; }
+        .topbar-meta strong { display: block; font-size: 14px; letter-spacing: .02em; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .topbar-meta span { opacity: .8; }
 
         /* ---------- Layout ---------- */
-        .layout { max-width: 1520px; margin: 0 auto; padding: 24px; display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 24px; align-items: start; }
+        .layout { max-width: 1520px; margin: 0 auto; padding: 24px; display: grid; grid-template-columns: 350px minmax(0, 1fr); gap: 24px; align-items: start; }
         .panel { position: sticky; top: 16px; display: flex; flex-direction: column; gap: 16px; }
 
         .tarjeta { background: #fff; border: 1px solid var(--linea); border-radius: 12px; padding: 18px 18px 20px; }
@@ -56,125 +61,240 @@
 
         .form-label { font-size: 12.5px; font-weight: 600; color: var(--tinta-2); margin-bottom: 4px; }
         .form-control, .form-select { border-color: #d8d2d5; border-radius: 8px; font-size: 14px; }
-        .form-control:focus, .form-select:focus { border-color: var(--guinda); box-shadow: 0 0 0 3px rgba(108,29,69,.14); }
+        .form-control:focus, .form-select:focus, .form-check-input:focus { border-color: var(--guinda); box-shadow: 0 0 0 3px rgba(108,29,69,.14); }
         .input-group-text { background: #faf8f9; border-color: #d8d2d5; color: var(--gris); font-size: 13.5px; }
         .ayuda { font-size: 12px; color: var(--gris); margin-top: 4px; }
+        .ayuda.ok { color: var(--bien); }
+        .ayuda.mal { color: var(--mal); }
+        .separador { border-top: 1px dashed var(--linea); margin: 14px 0 12px; }
 
-        .fila-label { display: flex; align-items: baseline; justify-content: space-between; }
-        .link-nueva { border: 0; background: none; padding: 0; font-size: 12.5px; font-weight: 600; color: var(--guinda); }
-        .link-nueva:hover { text-decoration: underline; }
-        .rubro-info { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 12.5px; color: var(--gris); min-height: 22px; }
-        .rubro-info .chip { font-size: 11.5px; }
+        .fila-label { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+        .link-boton { border: 0; background: none; padding: 0; font-size: 12.5px; font-weight: 600; color: var(--guinda); }
+        .link-boton:hover { text-decoration: underline; }
+        .link-peligro { color: var(--mal); }
+        .clasif-info { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 8px; font-size: 12.5px; color: var(--gris); min-height: 22px; }
+        .clasif-info .chip { font-size: 11.5px; }
+        .config-resumen { font-size: 12.5px; color: var(--gris); margin-top: 6px; }
+        .nota-fecha { font-size: 13px; color: var(--tinta-2); background: var(--guinda-suave); border-radius: 8px; padding: 8px 10px; margin-bottom: 14px; }
 
-        .tasas { border-top: 1px dashed var(--linea); margin-top: 14px; padding-top: 12px; }
-        .tasas .input-group-text { justify-content: center; font-weight: 600; color: var(--tinta-2); }
-        .tasas .form-control { min-width: 0; text-align: right; }
+        .fechas-guardadas { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .fecha-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 20px; border: 1px solid var(--linea); background: #faf8f9; font-size: 12.5px; color: var(--tinta-2); text-decoration: none; }
+        .fecha-chip:hover { border-color: var(--guinda); color: var(--guinda); }
+        .fecha-chip.activa { background: var(--guinda); border-color: var(--guinda); color: #fff; }
+        .fecha-chip small { opacity: .7; }
 
         .btn-guinda { background: var(--guinda); border-color: var(--guinda); color: #fff; font-weight: 600; border-radius: 8px; }
-        .btn-guinda:hover, .btn-guinda:focus { background: var(--guinda-oscuro); border-color: var(--guinda-oscuro); color: #fff; }
+        .btn-guinda:hover, .btn-guinda:focus, .btn-guinda.show { background: var(--guinda-oscuro); border-color: var(--guinda-oscuro); color: #fff; }
         .btn-suave { background: var(--guinda-suave); border: 1px solid #ead7e0; color: var(--guinda); font-weight: 600; border-radius: 8px; }
         .btn-suave:hover { background: #efdfe7; color: var(--guinda-oscuro); }
-        .btn-borde { border: 1px solid #d8d2d5; background: #fff; color: var(--tinta-2); font-weight: 600; border-radius: 8px; }
-        .btn-borde:hover { border-color: var(--mal); color: var(--mal); background: #fff; }
+        .btn-cuadro { border: 1px solid #d8d2d5; background: #fff; color: var(--tinta-2); border-radius: 8px; width: 38px; flex: none; }
+        .btn-cuadro:hover { border-color: var(--guinda); color: var(--guinda); }
+        .form-check-input:checked { background-color: var(--guinda); border-color: var(--guinda); }
+
+        /* ---------- Estático / dinámico ---------- */
+        .segmentado { display: flex; background: #eee9ec; border-radius: 9px; padding: 3px; gap: 3px; margin-bottom: 6px; }
+        .segmentado label { flex: 1; text-align: center; padding: 6px 8px; border-radius: 7px; font-size: 13.5px; font-weight: 600; color: var(--tinta-2); cursor: pointer; margin: 0; }
+        .segmentado .btn-check:checked + label { background: #fff; color: var(--guinda); box-shadow: 0 1px 2px rgba(0,0,0,.1); }
+        .segmentado .btn-check:focus-visible + label { outline: 2px solid var(--guinda); outline-offset: 1px; }
+        .nota-periodo { max-width: 1000px; margin: 0 auto 12px; font-size: 13px; color: var(--tinta-2); background: #eef4fb; border-radius: 8px; padding: 8px 12px; }
+
+        /* ---------- Buscador y filtros ---------- */
+        .buscador { position: relative; }
+        .btn-limpiar { border: 1px solid #d8d2d5; border-left: 0; background: #fff; color: #a59ca1; border-radius: 0 8px 8px 0; }
+        .btn-limpiar:hover { color: var(--guinda); }
+        .filtros { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; align-items: center; }
+        .filtro { border: 1px solid var(--linea); background: #fff; color: var(--tinta-2); border-radius: 20px; padding: 2px 10px; font-size: 12px; font-weight: 600; line-height: 1.6; }
+        .filtro:hover { border-color: var(--guinda); color: var(--guinda); }
+        .filtro.activo { background: var(--guinda); border-color: var(--guinda); color: #fff; }
+        .filtro-sep { width: 1px; height: 16px; background: var(--linea); margin: 0 2px; }
+        .resultados { position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 4px); max-height: 300px; overflow-y: auto;
+            background: #fff; border: 1px solid #d8d2d5; border-radius: 10px; box-shadow: 0 10px 28px rgba(40,20,30,.16); padding: 4px 0; }
+        .resultados .grupo { position: sticky; top: -4px; background: #faf8f9; font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--gris); padding: 6px 12px 4px; }
+        .resultados .opcion { display: flex; align-items: center; gap: 6px; padding: 6px 12px; font-size: 14px; cursor: pointer; }
+        .resultados .opcion mark { background: #fbeec2; padding: 0; color: inherit; }
+        .resultados .opcion.marcada, .resultados .opcion:hover { background: var(--guinda-suave); }
+        .resultados .opcion .chip { font-size: 10.5px; padding: 1px 6px; }
+        .resultados .opcion.seleccionada::after { content: '✓'; margin-left: auto; color: var(--guinda); font-weight: 700; }
+        .resultados .pie { font-size: 12px; color: var(--gris); padding: 6px 12px 4px; border-top: 1px solid #f1eef0; margin-top: 4px; }
+        .resultados .nueva { color: var(--guinda); font-weight: 600; }
+        .barra-filtro { display: flex; align-items: center; gap: 10px 14px; flex-wrap: wrap; padding: 10px 16px; border-bottom: 1px solid var(--linea); background: #fdfcfc; }
+        .barra-filtro.solo { background: #fff; border: 1px solid var(--linea); border-radius: 12px; margin-bottom: 14px; }
+        .barra-filtro .filtros { margin-top: 0; }
+        .caja-busqueda { width: 240px; max-width: 100%; }
+        .filtro-conteo { margin-left: auto; font-size: 12.5px; color: var(--gris); white-space: nowrap; }
 
         /* ---------- Indicadores ---------- */
         .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
-        .kpi { background: #fff; border: 1px solid var(--linea); border-radius: 12px; padding: 14px 16px; }
+        .kpi { background: #fff; border: 1px solid var(--linea); border-radius: 12px; padding: 14px 16px; min-width: 0; }
         .kpi-label { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--gris); }
         .kpi-valor { display: block; font-family: var(--serif); font-size: 24px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums lining-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .kpi-nota { font-size: 12px; color: var(--gris); }
         .kpi.neg .kpi-valor { color: var(--mal); }
-        .kpi.destacado { background: var(--guinda); border-color: var(--guinda); color: #fff; }
-        .kpi.destacado .kpi-label, .kpi.destacado .kpi-nota { color: rgba(255,255,255,.78); }
-        .kpi.destacado.neg .kpi-valor { color: #ffd2cf; }
+        .kpi.cuadra { background: var(--bien); border-color: var(--bien); color: #fff; }
+        .kpi.no-cuadra { background: var(--mal); border-color: var(--mal); color: #fff; }
+        .kpi.cuadra .kpi-label, .kpi.cuadra .kpi-nota, .kpi.no-cuadra .kpi-label, .kpi.no-cuadra .kpi-nota { color: rgba(255,255,255,.85); }
+        .kpi.sin-datos { background: #fff; }
 
         /* ---------- Barra de pestañas ---------- */
         .barra { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
-        .pestanas { display: inline-flex; background: #e9e5e7; border-radius: 10px; padding: 4px; gap: 2px; }
+        .pestanas { display: inline-flex; flex-wrap: wrap; background: #e9e5e7; border-radius: 10px; padding: 4px; gap: 2px; }
         .pestana { border: 0; background: transparent; padding: 7px 14px; border-radius: 7px; font-size: 14px; font-weight: 600; color: var(--tinta-2); }
         .pestana:hover { color: var(--tinta); }
         .pestana.active { background: #fff; color: var(--guinda); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
         .contador { display: inline-block; min-width: 20px; padding: 0 6px; margin-left: 4px; border-radius: 10px; background: rgba(0,0,0,.08); font-size: 12px; text-align: center; }
         .pestana.active .contador { background: var(--guinda-suave); }
         .barra-der { margin-left: auto; display: flex; align-items: center; gap: 14px; }
-        .form-switch .form-check-input:checked { background-color: var(--guinda); border-color: var(--guinda); }
         .form-check-label { font-size: 13.5px; color: var(--tinta-2); }
 
-        /* ---------- Hoja: el estado de resultados en formato clásico ---------- */
+        /* ---------- Validación contable ---------- */
+        .validacion { max-width: 1000px; margin: 0 auto 14px; background: #fff; border: 1px solid var(--linea); border-left: 5px solid var(--bien); border-radius: 12px; padding: 16px 18px; }
+        .validacion.mal { border-left-color: var(--mal); }
+        .validacion-cabeza { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+        .validacion-cabeza h2 { font-size: 12px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--gris); margin: 0; }
+        .sello-ok, .sello-mal { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; }
+        .sello-ok { background: var(--bien-suave); color: var(--bien); }
+        .sello-mal { background: var(--mal-suave); color: var(--mal); }
+        .ecuacion { display: flex; align-items: stretch; gap: 8px; flex-wrap: wrap; }
+        .termino { flex: 1 1 150px; border: 1px solid var(--linea); border-radius: 10px; padding: 8px 12px; background: #faf8f9; min-width: 0; }
+        .termino small { display: block; font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--gris); }
+        .termino strong { display: block; font-family: var(--serif); font-size: 18px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .operador { align-self: center; font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--gris); }
+        .ecuacion-2 { font-size: 13.5px; color: var(--tinta-2); margin-top: 10px; }
+        .ecuacion-2 strong { font-variant-numeric: tabular-nums; }
+        .pistas { margin: 10px 0 0; padding: 10px 12px 10px 30px; background: var(--mal-suave); border-radius: 8px; font-size: 13.5px; color: #7d1c16; }
+        .pistas li + li { margin-top: 3px; }
+        details.detalle-sumas { margin-top: 12px; font-size: 13.5px; }
+        details.detalle-sumas summary { cursor: pointer; font-weight: 600; color: var(--guinda); }
+        .tabla-sumas { width: 100%; margin-top: 8px; font-variant-numeric: tabular-nums; }
+        .tabla-sumas td { padding: 3px 6px; border-bottom: 1px solid #f1eef0; }
+        .tabla-sumas td.num { text-align: right; white-space: nowrap; }
+        .tabla-sumas tr.es-total td { font-weight: 700; border-bottom: 2px solid var(--linea); }
+        .razones { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+        .razon { border: 1px dashed var(--linea); border-radius: 8px; padding: 6px 10px; }
+        .razon small { display: block; color: var(--gris); font-size: 11.5px; }
+        .razon strong { font-variant-numeric: tabular-nums; }
+
+        .avisos { max-width: 1000px; margin: 0 auto 14px; padding: 12px 16px; border-radius: 10px; background: var(--aviso-suave); border: 1px solid #f1dfa9; color: var(--aviso); font-size: 14px; }
+        .avisos strong { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+        .avisos ul { margin: 0; padding-left: 22px; }
+
+        /* ---------- Hoja: el balance en formato clásico ---------- */
         .hoja {
             background: var(--papel); max-width: 1000px; margin: 0 auto;
-            padding: 52px 56px 48px; border: 1px solid #e8e2dc; border-radius: 4px;
+            padding: 52px 56px 40px; border: 1px solid #e8e2dc; border-radius: 4px;
             box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 12px 32px -12px rgba(60,30,40,.18);
             font-family: var(--serif); color: var(--tinta);
         }
         .hoja-encabezado { text-align: center; padding-bottom: 14px; margin-bottom: 20px; border-bottom: 3px double var(--tinta); }
-        .hoja-empresa { font-size: 21px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; margin: 0; }
+        .hoja-empresa { font-size: 21px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; margin: 0; overflow-wrap: anywhere; }
         .hoja-titulo { font-size: 16.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin: 4px 0 2px; }
-        .hoja-periodo { font-size: 14.5px; text-transform: uppercase; letter-spacing: .02em; margin: 0; }
+        .hoja-fecha { font-size: 14.5px; text-transform: uppercase; letter-spacing: .02em; margin: 0; }
         .hoja-cifras { font-size: 12.5px; font-style: italic; color: var(--gris); margin: 2px 0 0; }
+        .hoja-vacia { text-align: center; color: var(--gris); font-family: var(--sans); font-size: 14px; margin: 8px 0 12px; }
+        .hoja-pie { margin-top: 22px; font-size: 12.5px; font-style: italic; color: var(--gris); text-align: right; }
+        .nota-omitidas { max-width: 1000px; margin: 10px auto 0; font-size: 13px; color: var(--gris); }
 
         .hoja-tabla { overflow-x: auto; }
         table.estado { width: 100%; border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums lining-nums; }
-        table.estado td { padding: 2px 0; vertical-align: bottom; }
-        table.estado tr:hover td { background: rgba(108,29,69,.035); }
+        table.estado td, table.estado th { padding: 2px 0; vertical-align: bottom; }
+        table.estado tbody tr:hover td { background: rgba(108,29,69,.035); }
         td.concepto { padding-right: 10px !important; }
         td.concepto.s1 { padding-left: 1.4rem; }
         td.concepto.s2 { padding-left: 2.8rem; }
-        td.monto { width: 8.6rem; padding-left: .9rem !important; }
+        td.monto { width: 8.8rem; padding-left: .9rem !important; }
         td.monto .m { display: flex; align-items: baseline; padding-bottom: 2px; }
         td.monto .pesos { padding-right: 6px; }
         td.monto .cifra { margin-left: auto; white-space: nowrap; }
         td.monto .cifra:not(.neg)::after { content: ')'; visibility: hidden; }   /* alinea los dígitos con los negativos (…) */
         td.raya-simple .m { border-bottom: 1px solid var(--tinta); }
         td.raya-doble .m { border-bottom: 3.5px double var(--tinta); }
+        td.pct { width: 6rem; text-align: right; padding-left: .9rem !important; white-space: nowrap; color: var(--tinta-2); }
+        table.estado thead th { font-family: var(--sans); font-size: 12.5px; font-weight: 700; text-align: right; color: var(--tinta-2); padding-bottom: 8px; border-bottom: 1px solid var(--linea); }
 
-        tr.fila-grupo td.concepto { padding-top: 6px; }
+        tr.fila-seccion td.concepto { font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding-top: 16px; }
+        table.estado tbody tr.fila-seccion:first-child td.concepto { padding-top: 0; }
+        tr.fila-grupo td.concepto { font-weight: 600; padding-top: 6px; }
         tr.fila-grupo td.concepto::after { content: ':'; }
-        tr.fila-grupo td.concepto.s0 { font-weight: 700; }
-        tr.fila-resultado td { font-weight: 700; }
+        tr.fila-subtotal td.concepto { font-style: italic; }
         tr.fila-total td { font-weight: 700; text-transform: uppercase; letter-spacing: .03em; padding-top: 8px; }
         tr.fila-total td.monto { padding-bottom: 4px; }
+        tr.fila-ecuacion td { padding-top: 14px; font-family: var(--sans); font-size: 13px; color: var(--tinta-2); }
 
         td.coment { display: none; width: 18%; padding-right: 12px !important; font-family: var(--sans); font-style: italic; font-size: 12.5px; color: var(--gris); }
         .con-comentarios td.coment { display: table-cell; }
+        .comp-fechas { font-size: 13.5px; margin: 6px 0 0; }
 
-        /* ---------- Movimientos ---------- */
+        /* ---------- Cuentas registradas y catálogo ---------- */
         .tabla-mov { background: #fff; border: 1px solid var(--linea); border-radius: 12px; overflow: hidden; }
+        .tabla-mov-cabeza { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 12px 16px; border-bottom: 1px solid var(--linea); font-size: 13.5px; color: var(--tinta-2); }
+        .tabla-mov-cabeza .acciones { margin-left: auto; display: flex; gap: 14px; flex-wrap: wrap; }
         .tabla-mov table { margin: 0; font-size: 14px; }
-        .tabla-mov thead th { background: #faf8f9; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--gris); border-bottom: 1px solid var(--linea); padding: 10px 14px; }
+        .tabla-mov thead th { background: #faf8f9; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--gris); border-bottom: 1px solid var(--linea); padding: 10px 14px; white-space: nowrap; }
         .tabla-mov td { padding: 10px 14px; border-color: #f0ecee; }
         .tabla-mov .num { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+        .tabla-mov tr.en-cero td { color: #a59ca1; }
         .chip { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; }
-        .chip-ventas    { background: #e6f4ec; color: #22663f; }
-        .chip-costo     { background: #fdeee2; color: #8a4a12; }
-        .chip-operacion { background: #e6f0fb; color: #1d4f8a; }
-        .chip-otros     { background: #efe9fb; color: #4d2f8a; }
-        .chip-fuera     { background: #f1eff0; color: #77707a; }
+        .chip-activo  { background: #e6f0fb; color: #1d4f8a; }
+        .chip-pasivo  { background: #fdeee2; color: #8a4a12; }
+        .chip-capital { background: #efe9fb; color: #4d2f8a; }
+        .chip-resta   { background: var(--mal-suave); color: var(--mal); }
+        .chip-cero    { background: #f1eef0; color: var(--gris); }
         .sub { font-size: 12.5px; color: var(--gris); margin-left: 4px; }
-        .fuera { color: var(--mal); font-size: 12px; margin-left: 6px; }
         .btn-icono { border: 0; background: transparent; color: #a59ca1; width: 32px; height: 32px; border-radius: 8px; }
-        .btn-icono:hover { background: var(--mal-suave); color: var(--mal); }
+        .btn-icono:hover { background: var(--guinda-suave); color: var(--guinda); }
+        .btn-icono.peligro:hover { background: var(--mal-suave); color: var(--mal); }
         .vacio { padding: 48px 24px; text-align: center; color: var(--gris); }
         .vacio i { font-size: 32px; color: #cfc6cb; display: block; margin-bottom: 8px; }
+
+        .catalogo { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: start; }
+        .cat-seccion { background: #fff; border: 1px solid var(--linea); border-radius: 12px; padding: 14px 16px; }
+        .cat-seccion h3 { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; margin: 0 0 4px; }
+        .cat-seccion > p { font-size: 12.5px; color: var(--gris); margin: 0 0 6px; }
+        .cat-rubro { font-size: 12.5px; font-weight: 700; color: var(--tinta-2); margin: 12px 0 2px; }
+        .cat-rubro span { font-weight: 400; color: var(--gris); }
+        .cat-lista { list-style: none; margin: 0; padding: 0; }
+        .cat-lista li { display: flex; align-items: center; gap: 6px; padding: 3px 0; font-size: 14px; border-bottom: 1px solid #f4f1f2; }
+        .cat-lista li:last-child { border-bottom: 0; }
+        .cat-lista .nombre { min-width: 0; overflow-wrap: anywhere; }
+        .cat-lista .usos { margin-left: auto; font-size: 12px; color: var(--gris); white-space: nowrap; }
+        .cat-lista .vacia { color: #b4acb0; font-style: italic; font-size: 13px; }
+        .cat-lista .chip { font-size: 10.5px; padding: 1px 6px; }
+        .cat-cabeza { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; font-size: 13.5px; color: var(--tinta-2); flex-wrap: wrap; }
+        .cat-cabeza .btn { margin-left: auto; }
+
+        /* ---------- Bienvenida ---------- */
+        .bienvenida { max-width: 520px; margin: 64px auto; padding: 0 16px; }
+        .bienvenida .tarjeta { padding: 32px; }
+        .bienvenida h1 { font-family: var(--serif); font-size: 26px; font-weight: 700; margin-bottom: 6px; }
 
         .modal-content { border-radius: 14px; border: 0; }
         .icono-peligro { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: var(--mal-suave); color: var(--mal); font-size: 20px; margin-bottom: 14px; }
         .resumen-mov { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border: 1px solid var(--linea); border-radius: 10px; background: #faf8f9; }
         .resumen-mov .num { font-family: var(--serif); font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .sugerencia { display: none; margin-top: 8px; padding: 8px 10px; border-radius: 8px; background: #eef4fb; color: #1d4f8a; font-size: 12.5px; }
+        .sugerencia.visible { display: block; }
+        .zona-peligro { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--linea); display: flex; align-items: center; gap: 12px; }
+        .zona-peligro p { margin: 0; font-size: 13px; color: var(--gris); }
         .toast { border-radius: 10px; border: 0; box-shadow: 0 8px 24px rgba(0,0,0,.15); }
 
-        @media (max-width: 1279px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 1279px) {
+            .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .catalogo { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
         @media (max-width: 991px) {
             .layout { grid-template-columns: minmax(0, 1fr); padding: 16px; }
             .panel { position: static; }
             .topbar-meta { display: none; }
+            .catalogo { grid-template-columns: minmax(0, 1fr); }
         }
         @media (max-width: 640px) {
             .hoja { padding: 26px 14px; }
             table.estado { font-size: 13px; min-width: 620px; }
-            td.monto { width: 6.4rem; padding-left: .5rem !important; }
+            td.monto { width: 6.6rem; padding-left: .5rem !important; }
             .barra-der { margin-left: 0; width: 100%; justify-content: space-between; }
             .kpi-valor { font-size: 19px; }
+            .operador { display: none; }
+            .razones { grid-template-columns: minmax(0, 1fr); }
         }
     </style>
 </head>
@@ -182,316 +302,846 @@
 
 <header class="topbar">
     <div class="topbar-inner">
-        <div class="sello">Σ</div>
+        <img class="logo" th:src="@{/imagenes/IPN-Logo.png}" src="/imagenes/IPN-Logo.png" alt="Logo del IPN">
         <div>
-            <div class="marca-titulo">Estado de Resultados</div>
+            <div class="marca-titulo">Balance General</div>
             <div class="marca-sub">Instituto Politécnico Nacional</div>
         </div>
-        <div class="topbar-meta">
-            <strong class="js-empresa">NOMBRE DE LA EMPRESA</strong>
-            <span id="metaPeriodo"></span>
+        <div class="topbar-meta" th:unless="${sinEmpresas}">
+            <strong th:text="${empresa.nombre}">Empresa</strong>
+            <span th:text="${'Balance ' + periodoTexto}">Balance al 31/12/2026</span>
         </div>
     </div>
 </header>
 
-<main class="layout">
-
-    <!-- ===================== PANEL IZQUIERDO ===================== -->
-    <aside class="panel">
-
-        <section class="tarjeta">
-            <h2 class="tarjeta-titulo"><i class="bi bi-building"></i>Datos del reporte</h2>
-
-            <div class="mb-2">
-                <label class="form-label" for="nombreEmpresa">Nombre de la empresa</label>
-                <input type="text" id="nombreEmpresa" class="form-control" placeholder="Ej. La Comercial Mercantil, S.A." autocomplete="off">
-            </div>
-            <div class="row g-2">
-                <div class="col-6">
-                    <label class="form-label" for="fechaInicio">Del</label>
-                    <input type="date" id="fechaInicio" class="form-control">
-                </div>
-                <div class="col-6">
-                    <label class="form-label" for="fechaFin">Al</label>
-                    <input type="date" id="fechaFin" class="form-control">
-                </div>
-            </div>
-
-            <form class="tasas" th:action="@{/tasas}" method="post">
-                <label class="form-label">Tasas de impuestos</label>
-                <div class="row g-2">
-                    <div class="col-6">
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text">ISR</span>
-                            <input type="number" name="isr" class="form-control" min="0" max="100" step="0.01" required
-                                   th:value="${reporte.tasaIsrTexto}" value="33">
-                            <span class="input-group-text px-2">%</span>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text">PTU</span>
-                            <input type="number" name="ptu" class="form-control" min="0" max="100" step="0.01" required
-                                   th:value="${reporte.tasaPtuTexto}" value="10">
-                            <span class="input-group-text px-2">%</span>
-                        </div>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-suave btn-sm w-100 mt-2"><i class="bi bi-check2 me-1"></i>Aplicar tasas</button>
-            </form>
-
-            <button type="button" class="btn btn-borde btn-sm w-100 mt-3" data-bs-toggle="modal" data-bs-target="#modalReiniciar">
-                <i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar / nuevo ejercicio
-            </button>
-        </section>
-
-        <section class="tarjeta">
-            <h2 class="tarjeta-titulo"><i class="bi bi-plus-circle"></i>Registrar movimiento</h2>
-
-            <form th:action="@{/guardar}" th:object="${nuevaCuenta}" method="post" id="formCuenta" novalidate>
-
-                <div class="mb-3">
-                    <div class="fila-label">
-                        <label class="form-label" for="selectorCuenta">Cuenta</label>
-                        <button type="button" class="link-nueva" data-bs-toggle="modal" data-bs-target="#modalCuenta">
-                            <i class="bi bi-plus-lg"></i> Nueva cuenta
-                        </button>
-                    </div>
-                    <select class="form-select" id="selectorCuenta"></select>
-                    <div class="rubro-info" id="infoRubro">Elige una cuenta del catálogo.</div>
-                    <input type="hidden" th:field="*{nombre}" id="nombreRealCuenta">
-                    <input type="hidden" th:field="*{clasificacion}" id="campoSeccion">
-                    <input type="hidden" th:field="*{subclasificacion}" id="campoRubro">
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label" for="comentarios">Comentario <span class="fw-normal text-muted">(opcional)</span></label>
-                    <input type="text" class="form-control" th:field="*{comentarios}" id="comentarios" placeholder="No. de factura, concepto…" autocomplete="off">
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label" for="importeVisual">Importe</label>
-                    <div class="input-group">
-                        <span class="input-group-text">$</span>
-                        <input type="text" class="form-control" id="importeVisual" inputmode="decimal" placeholder="150,000.00" autocomplete="off">
-                    </div>
-                    <input type="hidden" th:field="*{importe}" id="importeReal">
-                </div>
-
-                <button type="submit" class="btn btn-guinda w-100" id="btnRegistrar">
-                    <i class="bi bi-check2 me-1"></i>Registrar movimiento
-                </button>
-            </form>
-        </section>
-    </aside>
-
-    <!-- ===================== CONTENIDO ===================== -->
-    <section>
-
-        <div class="kpis">
-            <div class="kpi">
-                <span class="kpi-label">Ventas netas</span>
-                <span class="kpi-valor" th:text="${'$' + #numbers.formatDecimal(reporte.ventasNetas, 1, 'COMMA', 2, 'POINT')}">$0.00</span>
-            </div>
-            <div class="kpi">
-                <span class="kpi-label">Costo de lo vendido</span>
-                <span class="kpi-valor" th:text="${'$' + #numbers.formatDecimal(reporte.costoVendido, 1, 'COMMA', 2, 'POINT')}">$0.00</span>
-            </div>
-            <div class="kpi" th:classappend="${reporte.utilidadOperacion < 0} ? 'neg'">
-                <span class="kpi-label" th:text="${reporte.utilidadOperacion < 0} ? 'Pérdida de operación' : 'Utilidad de operación'">Utilidad de operación</span>
-                <span class="kpi-valor" th:text="${'$' + #numbers.formatDecimal(reporte.utilidadOperacion, 1, 'COMMA', 2, 'POINT')}">$0.00</span>
-            </div>
-            <div class="kpi destacado" th:classappend="${reporte.utilidadNeta < 0} ? 'neg'">
-                <span class="kpi-label" th:text="${reporte.utilidadNeta < 0} ? 'Pérdida neta' : 'Utilidad neta'">Utilidad neta</span>
-                <span class="kpi-valor" th:text="${'$' + #numbers.formatDecimal(reporte.utilidadNeta, 1, 'COMMA', 2, 'POINT')}">$0.00</span>
-                <span class="kpi-nota" th:text="${'Margen neto: ' + reporte.margenNetoTexto}">Margen neto</span>
-            </div>
-        </div>
-
-        <div class="barra">
-            <nav class="pestanas" role="tablist">
-                <button class="pestana active" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#pane-ER">Estado de resultados</button>
-                <button class="pestana" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#pane-MOV">
-                    Movimientos <span class="contador" th:text="${#lists.size(cuentas)}">0</span>
-                </button>
-            </nav>
-
-            <div class="barra-der">
-                <div class="form-check form-switch m-0">
-                    <input class="form-check-input" type="checkbox" role="switch" id="toggleComentarios">
-                    <label class="form-check-label" for="toggleComentarios">Comentarios</label>
-                </div>
-                <button class="btn btn-guinda" type="button" id="btnPDF">
-                    <i class="bi bi-file-earmark-pdf me-1"></i>Exportar PDF
-                </button>
-            </div>
-        </div>
-
-        <div class="tab-content">
-
-            <!-- Estado de resultados: mismas líneas que el PDF -->
-            <div class="tab-pane fade show active" id="pane-ER" role="tabpanel">
-                <article class="hoja">
-                    <header class="hoja-encabezado">
-                        <p class="hoja-empresa js-empresa">NOMBRE DE LA EMPRESA</p>
-                        <h3 class="hoja-titulo" th:text="${estado.titulo}">Estado de Resultados</h3>
-                        <p class="hoja-periodo js-periodo"></p>
-                        <p class="hoja-cifras">(Cifras en pesos mexicanos)</p>
-                    </header>
-
-                    <div class="hoja-tabla">
-                        <table class="estado">
-                            <tbody>
-                            <tr th:each="l : ${estado.lineas}" th:class="${'fila-' + l.estilo}">
-                                <td class="concepto" th:classappend="${'s' + l.sangria}" th:text="${l.concepto}">Concepto</td>
-                                <td class="coment" th:text="${l.comentario}"></td>
-                                <td class="monto" th:each="c : ${l.celdas}"
-                                    th:classappend="${c != null and c.subrayado != null} ? ${'raya-' + c.subrayado}">
-                                    <div class="m" th:if="${c != null}">
-                                        <span class="pesos" th:if="${c.pesos}">$</span>
-                                        <span class="cifra" th:classappend="${c.negativo} ? 'neg'" th:text="${c.texto}">0.00</span>
-                                    </div>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </article>
-            </div>
-
-            <!-- Movimientos registrados -->
-            <div class="tab-pane fade" id="pane-MOV" role="tabpanel">
-                <div class="tabla-mov">
-                    <div class="vacio" th:if="${#lists.isEmpty(cuentas)}">
-                        <i class="bi bi-journal-text"></i>
-                        Aún no hay movimientos. Registra el primero en el panel de la izquierda.
-                    </div>
-                    <div class="table-responsive" th:unless="${#lists.isEmpty(cuentas)}">
-                        <table class="table align-middle">
-                            <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Cuenta</th>
-                                <th>Rubro</th>
-                                <th>Comentario</th>
-                                <th class="text-end">Importe</th>
-                                <th></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="c, it : ${cuentas}">
-                                <td class="text-muted" th:text="${it.count}">1</td>
-                                <td>
-                                    <span class="fw-semibold" th:text="${c.nombre}">Compras</span>
-                                    <span class="fuera" th:if="${fuera.contains(c.id)}" title="Este movimiento es de una versión anterior y no entra al estado de resultados">
-                                        <i class="bi bi-exclamation-circle"></i> no aparece en el estado
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="chip" th:classappend="${colores.get(c.clasificacion) ?: 'chip-fuera'}" th:text="${c.clasificacion}">Costo de ventas</span>
-                                    <span class="sub" th:text="${c.subclasificacion}">Compras</span>
-                                </td>
-                                <td class="text-muted small" th:text="${c.comentarios}"></td>
-                                <td class="text-end num" th:text="${'$' + #numbers.formatDecimal(c.importe, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
-                                <td class="text-end">
-                                    <button type="button" class="btn-icono" title="Eliminar"
-                                            data-bs-toggle="modal" data-bs-target="#modalEliminar"
-                                            th:data-url="@{/eliminar/{id}(id=${c.id})}"
-                                            th:data-nombre="${c.nombre}"
-                                            th:data-detalle="${c.subclasificacion}"
-                                            th:data-importe="${'$' + #numbers.formatDecimal(c.importe, 1, 'COMMA', 2, 'POINT')}">
-                                        <i class="bi bi-trash3"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-</main>
-
-<!-- MODAL: Nueva cuenta (se agrega al catálogo sin recargar la página) -->
-<div class="modal fade" id="modalCuenta" tabindex="-1" aria-labelledby="tituloModalCuenta" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <form class="modal-content shadow" id="formNuevaCuenta" novalidate>
-            <div class="modal-body p-4">
-                <h5 class="fw-bold mb-1" id="tituloModalCuenta">Agregar cuenta al catálogo</h5>
-                <p class="text-muted small mb-3">Después la eliges en “Cuenta” y registras su importe.</p>
-
-                <div class="mb-3">
-                    <label class="form-label" for="inputNuevaCuenta">Nombre de la cuenta</label>
-                    <input type="text" class="form-control" id="inputNuevaCuenta" placeholder="Ej. Fletes sobre compras" autocomplete="off">
-                    <div class="invalid-feedback">Escribe el nombre de la cuenta.</div>
-                </div>
-                <div class="mb-1">
-                    <label class="form-label" for="selectRubro">¿Dónde va en el estado de resultados?</label>
-                    <select class="form-select" id="selectRubro">
-                        <optgroup th:each="sec : ${rubros}" th:attr="label=${sec.key}">
-                            <option th:each="r : ${sec.value}" th:value="${r}" th:text="${r}">Rubro</option>
-                        </optgroup>
-                    </select>
-                </div>
-                <div class="ayuda">Se guarda en el catálogo de este navegador.</div>
-
-                <div class="d-flex justify-content-end gap-2 mt-4">
-                    <button type="button" class="btn btn-light px-3" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-guinda px-3"><i class="bi bi-plus-lg me-1"></i>Agregar cuenta</button>
-                </div>
-            </div>
+<!-- ===================== PRIMERA VEZ: no hay empresas ===================== -->
+<section class="bienvenida" th:if="${sinEmpresas}">
+    <div class="tarjeta">
+        <h1>Bienvenido</h1>
+        <p class="text-muted">Para empezar, crea la empresa a la que le vas a hacer el balance general. Puedes crear varias y cambiar entre ellas.</p>
+        <form th:action="@{/empresas}" method="post">
+            <label class="form-label" for="nombreEmpresaInicial">Nombre de la empresa</label>
+            <input type="text" id="nombreEmpresaInicial" name="nombre" class="form-control mb-3" maxlength="150" required
+                   placeholder="Ej. Comercializadora del Valle, S.A. de C.V." autocomplete="off">
+            <button type="submit" class="btn btn-guinda w-100"><i class="bi bi-plus-lg me-1"></i>Crear empresa</button>
         </form>
     </div>
-</div>
+</section>
 
-<!-- MODAL: Eliminar movimiento -->
-<div class="modal fade" id="modalEliminar" tabindex="-1" aria-labelledby="tituloModalEliminar" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content shadow">
-            <div class="modal-body p-4">
-                <div class="icono-peligro"><i class="bi bi-trash3"></i></div>
-                <h5 class="fw-bold mb-1" id="tituloModalEliminar">¿Eliminar este movimiento?</h5>
-                <p class="text-muted small mb-3">Se quitará del estado de resultados. Esta acción no se puede deshacer.</p>
+<th:block th:unless="${sinEmpresas}">
+    <main class="layout">
 
-                <div class="resumen-mov">
-                    <div>
-                        <div class="fw-semibold" id="elimNombre">Cuenta</div>
-                        <div class="small text-muted" id="elimDetalle"></div>
+        <!-- ===================== PANEL IZQUIERDO ===================== -->
+        <aside class="panel">
+
+            <section class="tarjeta">
+                <h2 class="tarjeta-titulo"><i class="bi bi-building"></i>Empresa y fecha</h2>
+
+                <label class="form-label" for="selEmpresa">Empresa</label>
+                <div class="d-flex gap-2">
+                    <select id="selEmpresa" class="form-select">
+                        <option th:each="e : ${empresas}" th:value="${e.id}" th:text="${e.nombre}"
+                                th:selected="${e.id == empresa.id}">Empresa</option>
+                    </select>
+                    <button type="button" class="btn btn-cuadro" title="Configurar esta empresa"
+                            data-bs-toggle="modal" data-bs-target="#modalConfigEmpresa"><i class="bi bi-gear"></i></button>
+                    <button type="button" class="btn btn-cuadro" title="Nueva empresa"
+                            data-bs-toggle="modal" data-bs-target="#modalNuevaEmpresa"><i class="bi bi-plus-lg"></i></button>
+                </div>
+                <div class="config-resumen" th:text="${'Orden de las cuentas: ' + empresa.ordenTexto}">Orden de las cuentas: catálogo</div>
+
+                <div class="separador"></div>
+
+                <form id="formFecha" th:action="@{/}" method="get" novalidate>
+                    <input type="hidden" name="empresa" th:value="${empresa.id}">
+                    <input type="hidden" name="comparar" id="campoComparar" th:value="${sel.comparar} ? '1' : '0'">
+
+                    <div class="form-label">Tipo de balance</div>
+                    <div class="segmentado" role="radiogroup" aria-label="Tipo de balance">
+                        <input type="radio" class="btn-check" name="tipo" id="tipoEstatico" value="ESTATICO" th:checked="${!dinamico}">
+                        <label for="tipoEstatico" title="Las cuentas a una fecha">Estático</label>
+                        <input type="radio" class="btn-check" name="tipo" id="tipoDinamico" value="DINAMICO" th:checked="${dinamico}">
+                        <label for="tipoDinamico" title="Todo lo registrado en un periodo">Dinámico</label>
                     </div>
-                    <div class="num" id="elimImporte">$0.00</div>
-                </div>
+                    <div class="ayuda mb-2" id="ayudaTipo" th:text="${dinamico} ? 'Suma lo registrado entre dos fechas: «Del 1 de enero al 31 de diciembre de 2026».' : 'Las cuentas a una sola fecha: «Al 31 de diciembre de 2026».'">Las cuentas a una sola fecha.</div>
 
-                <div class="d-flex justify-content-end gap-2 mt-4">
-                    <button type="button" class="btn btn-light px-3" data-bs-dismiss="modal">Cancelar</button>
-                    <form id="formEliminar" method="post" action="#">
-                        <button type="submit" class="btn btn-danger px-3" id="btnEliminar">
-                            <i class="bi bi-trash3 me-1"></i>Sí, eliminar
+                    <div class="row g-2">
+                        <div class="col-6" id="colInicio" th:classappend="${dinamico} ? '' : 'd-none'">
+                            <label class="form-label small" for="fechaInicio">Del</label>
+                            <input type="date" id="fechaInicio" name="inicio" class="form-control" th:value="${inicioIso}"
+                                   min="1900-01-01" max="2100-12-31">
+                        </div>
+                        <div id="colFecha" th:class="${dinamico} ? 'col-6' : 'col-12'">
+                            <label class="form-label small" for="fechaBalance" id="etiquetaFecha" th:text="${dinamico} ? 'Al' : 'Fecha del balance'">Fecha del balance</label>
+                            <input type="date" id="fechaBalance" name="fecha" class="form-control" th:value="${fechaIso}" required
+                                   min="1900-01-01" max="2100-12-31">
+                            <div class="invalid-feedback" id="errorFechaBalance">Escribe una fecha válida.</div>
+                        </div>
+                    </div>
+
+                    <div class="ayuda mt-2" th:if="${#lists.isEmpty(fechas)}">Todavía no hay balances capturados.</div>
+                    <div class="fechas-guardadas" th:unless="${#lists.isEmpty(fechas)}">
+                        <a th:each="f : ${fechas}" class="fecha-chip" th:classappend="${f.iso == fechaIso} ? 'activa'"
+                           th:href="@{/(tipo='ESTATICO',fecha=${f.iso})}" th:title="${'Ver el balance estático al ' + f.texto + ' (' + f.cuentas + ' cuentas)'}">
+                            <span th:text="${f.texto}">31/12/2026</span><small th:text="${f.cuentas}">9</small>
+                        </a>
+                    </div>
+
+                    <div class="form-check form-switch mt-3 mb-1">
+                        <input class="form-check-input" type="checkbox" role="switch" id="switchComparar" th:checked="${sel.comparar}">
+                        <label class="form-check-label" for="switchComparar" id="etiquetaComparar"
+                               th:text="${dinamico} ? 'Comparar con otro periodo' : 'Comparar con otra fecha'">Comparar con otra fecha</label>
+                    </div>
+                    <div id="bloqueComparar" th:classappend="${sel.comparar} ? '' : 'd-none'">
+                        <div class="row g-2">
+                            <div class="col-6" id="colInicio2" th:classappend="${dinamico} ? '' : 'd-none'">
+                                <input type="date" id="fechaInicio2" name="inicio2" class="form-control" th:value="${inicio2Iso}"
+                                       min="1900-01-01" max="2100-12-31" aria-label="Inicio del periodo para comparar">
+                            </div>
+                            <div id="colFecha2" th:class="${dinamico} ? 'col-6' : 'col-12'">
+                                <input type="date" id="fechaComparar" name="fecha2" class="form-control" th:value="${fecha2Iso}"
+                                       min="1900-01-01" max="2100-12-31" aria-label="Fecha para comparar">
+                                <div class="invalid-feedback">Elige otra fecha (no la misma del balance).</div>
+                            </div>
+                        </div>
+                        <div class="ayuda">Por defecto, un año antes.</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-suave btn-sm w-100 mt-3"><i class="bi bi-arrow-repeat me-1"></i>Ver balance</button>
+                </form>
+            </section>
+
+            <section class="tarjeta">
+                <h2 class="tarjeta-titulo"><i class="bi bi-plus-circle"></i>Registrar cuenta</h2>
+                <div class="nota-fecha" th:unless="${dinamico}"><i class="bi bi-calendar3 me-1"></i>Se agrega al balance al <strong th:text="${fechaTexto}">31/12/2026</strong>.</div>
+
+                <form th:action="@{/saldos}" method="post" id="formSaldo" novalidate>
+                    <input type="hidden" name="fecha" id="saldoFecha" th:value="${fechaIso}" th:unless="${dinamico}">
+                    <div class="mb-3" th:if="${dinamico}">
+                        <label class="form-label" for="saldoFecha">Fecha del registro</label>
+                        <input type="date" class="form-control" id="saldoFecha" name="fecha" th:value="${registroSugerido}"
+                               th:attr="min=${inicioIso},max=${fechaIso}" required>
+                        <div class="invalid-feedback" th:text="${'Debe estar dentro del periodo (' + inicioTexto + ' al ' + fechaTexto + ').'}">Dentro del periodo.</div>
+                    </div>
+                    <input type="hidden" name="cuentaId" id="saldoCuentaId">
+                    <input type="hidden" name="importe" id="saldoImporte">
+
+                    <div class="mb-3">
+                        <div class="fila-label">
+                            <label class="form-label" for="buscarCuenta">Cuenta</label>
+                            <button type="button" class="link-boton" data-bs-toggle="modal" data-bs-target="#modalCuenta">
+                                <i class="bi bi-plus-lg"></i> Nueva cuenta
+                            </button>
+                        </div>
+                        <div class="buscador" id="buscador">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input type="text" class="form-control" id="buscarCuenta" placeholder="Busca: banco, depreciación…"
+                                       autocomplete="off" role="combobox" aria-expanded="false" aria-controls="resultadosCuenta" aria-autocomplete="list">
+                                <button type="button" class="btn btn-limpiar" id="limpiarBusqueda" title="Limpiar" aria-label="Limpiar búsqueda"><i class="bi bi-x-lg"></i></button>
+                            </div>
+                            <div class="filtros" id="filtrosCuenta" aria-label="Filtros">
+                                <button type="button" class="filtro activo" data-seccion="">Todas</button>
+                                <button type="button" class="filtro" data-seccion="ACTIVO">Activo</button>
+                                <button type="button" class="filtro" data-seccion="PASIVO">Pasivo</button>
+                                <button type="button" class="filtro" data-seccion="CAPITAL">Capital</button>
+                                <span class="filtro-sep"></span>
+                                <button type="button" class="filtro" data-plazo="Corto plazo" title="Circulante / corto plazo">Corto plazo</button>
+                                <button type="button" class="filtro" data-plazo="Largo plazo" title="No circulante / largo plazo">Largo plazo</button>
+                                <button type="button" class="filtro" data-resta="1" title="Cuentas complementarias">Restan</button>
+                            </div>
+                            <div class="resultados" id="resultadosCuenta" role="listbox" aria-label="Cuentas" hidden></div>
+                        </div>
+                        <select class="d-none" id="selectorCuenta" aria-hidden="true" tabindex="-1">
+                            <option value="" disabled selected>Selecciona una cuenta…</option>
+                            <th:block th:each="cl : ${clasificaciones}">
+                                <optgroup th:if="${!#lists.isEmpty(catalogoPorClasificacion.get(cl.codigo))}" th:attr="label=${cl.etiqueta}">
+                                    <option th:each="c : ${catalogoPorClasificacion.get(cl.codigo)}" th:value="${c.id}"
+                                            th:text="${c.resta} ? ${c.nombre + ' (resta)'} : ${c.nombre}"
+                                            th:data-nombre="${c.nombre}" th:data-clasif="${cl.codigo}"
+                                            th:data-seccion="${cl.seccion.codigo}" th:data-plazo="${cl.plazo}"
+                                            th:data-resta="${c.resta}">Cuenta</option>
+                                </optgroup>
+                            </th:block>
+                            <option value="CUSTOM">＋ Agregar cuenta nueva…</option>
+                        </select>
+                        <div class="clasif-info" id="infoClasif">Elige una cuenta del catálogo.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="saldoImporteVisual">Importe</label>
+                        <div class="input-group has-validation">
+                            <span class="input-group-text">$</span>
+                            <input type="text" class="form-control" id="saldoImporteVisual" inputmode="decimal"
+                                   placeholder="150,000.00" autocomplete="off" maxlength="22">
+                        </div>
+                        <div class="ayuda" id="saldoImporteAyuda">Coma para miles y punto para decimales.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="saldoComentario">Comentario <span class="fw-normal text-muted">(opcional)</span></label>
+                        <input type="text" class="form-control" id="saldoComentario" name="comentario" maxlength="255"
+                               placeholder="No. de factura, banco, detalle…" autocomplete="off">
+                    </div>
+
+                    <button type="submit" class="btn btn-guinda w-100" id="btnRegistrar">
+                        <i class="bi bi-check2 me-1"></i>Registrar en el balance
+                    </button>
+                </form>
+            </section>
+        </aside>
+
+        <!-- ===================== CONTENIDO ===================== -->
+        <section>
+
+            <div class="kpis">
+                <div class="kpi">
+                    <span class="kpi-label">Total activo</span>
+                    <span class="kpi-valor" th:text="${balance.totalActivoTexto}">$0.00</span>
+                    <span class="kpi-nota">Lo que tiene</span>
+                </div>
+                <div class="kpi">
+                    <span class="kpi-label">Total pasivo</span>
+                    <span class="kpi-valor" th:text="${balance.totalPasivoTexto}">$0.00</span>
+                    <span class="kpi-nota">Lo que debe</span>
+                </div>
+                <div class="kpi" th:classappend="${balance.capitalNegativo} ? 'neg'">
+                    <span class="kpi-label">Capital contable</span>
+                    <span class="kpi-valor" th:text="${balance.totalCapitalTexto}">$0.00</span>
+                    <span class="kpi-nota">Lo de los dueños</span>
+                </div>
+                <div class="kpi" th:classappend="${balance.vacio} ? 'sin-datos' : (${balance.cuadra} ? 'cuadra' : 'no-cuadra')" id="kpiEcuacion">
+                    <span class="kpi-label">Ecuación contable</span>
+                    <span class="kpi-valor" th:text="${balance.vacio} ? 'Sin datos' : (${balance.cuadra} ? 'Cuadra ✓' : 'No cuadra')">Cuadra</span>
+                    <span class="kpi-nota" th:text="${balance.vacio} ? 'Registra cuentas' : (${balance.cuadra} ? 'Activo = Pasivo + Capital' : ('Diferencia: ' + ${balance.diferenciaTexto}))">A = P + C</span>
+                </div>
+            </div>
+
+            <div class="barra">
+                <nav class="pestanas" role="tablist">
+                    <button class="pestana active" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#pane-BG">Balance general</button>
+                    <button class="pestana" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#pane-COMP"
+                            th:if="${comparativo != null}">Comparativo</button>
+                    <button class="pestana" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#pane-CTA">
+                        Cuentas registradas <span class="contador" th:text="${#lists.size(saldos)}">0</span>
+                    </button>
+                    <button class="pestana" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#pane-CAT">
+                        Catálogo <span class="contador" th:text="${#lists.size(catalogo)}">0</span>
+                    </button>
+                </nav>
+
+                <div class="barra-der">
+                    <div class="form-check form-switch m-0">
+                        <input class="form-check-input" type="checkbox" role="switch" id="toggleComentarios">
+                        <label class="form-check-label" for="toggleComentarios">Comentarios</label>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-guinda dropdown-toggle" type="button" id="btnPDF" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-file-earmark-pdf me-1"></i>Exportar PDF
                         </button>
-                    </form>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li><button class="dropdown-item" type="button" data-pdf="BG">Balance general</button></li>
+                            <li th:if="${comparativo != null}"><button class="dropdown-item" type="button" data-pdf="COMP">Balance comparativo</button></li>
+                            <li th:if="${comparativo == null}"><span class="dropdown-item-text small text-muted">Para el comparativo, activa<br>“Comparar con otra fecha”.</span></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
 
-<!-- MODAL: Reiniciar ejercicio -->
-<div class="modal fade" id="modalReiniciar" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content shadow">
-            <div class="modal-body p-4">
-                <h5 class="fw-bold mb-2">¿Iniciar un nuevo ejercicio?</h5>
-                <p class="text-muted mb-4">Se eliminarán todos los movimientos registrados para empezar desde cero. Esta acción no se puede deshacer.</p>
-                <div class="d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-light px-3" data-bs-dismiss="modal">Cancelar</button>
-                    <form th:action="@{/reiniciar}" method="post">
-                        <button type="submit" class="btn btn-danger px-3">Sí, reiniciar</button>
-                    </form>
+            <div class="tab-content">
+
+                <!-- ============ Balance general: mismas líneas que el PDF ============ -->
+                <div class="tab-pane fade show active" id="pane-BG" role="tabpanel">
+
+                    <p class="nota-periodo" th:if="${dinamico and !balance.vacio}">
+                        <i class="bi bi-calendar-range me-1"></i>
+                        <span th:text="${'Balance dinámico: suma ' + balance.registros + ' registro(s) de ' + balance.numFechas + ' fecha(s) ' + periodoTexto + '. Si una cuenta se registró varias veces, sus importes se suman.'}">Balance dinámico.</span>
+                    </p>
+
+                    <!-- Módulo 4: validación contable -->
+                    <section class="validacion" th:unless="${balance.vacio}" th:classappend="${balance.cuadra} ? '' : 'mal'" id="panelValidacion">
+                        <div class="validacion-cabeza">
+                            <h2><i class="bi bi-check2-square me-1"></i>Validación contable</h2>
+                            <span class="sello-ok" th:if="${balance.cuadra}"><i class="bi bi-check-circle-fill"></i>Cumple la ecuación contable</span>
+                            <span class="sello-mal" th:unless="${balance.cuadra}"><i class="bi bi-x-circle-fill"></i>
+                            <span th:text="${'No cumple · diferencia ' + balance.diferenciaTexto}">No cumple</span></span>
+                        </div>
+                        <div class="ecuacion">
+                            <div class="termino"><small>Activo</small><strong th:text="${balance.totalActivoTexto}">$0.00</strong></div>
+                            <div class="operador" th:text="${balance.cuadra} ? '=' : '≠'">=</div>
+                            <div class="termino"><small>Pasivo</small><strong th:text="${balance.totalPasivoTexto}">$0.00</strong></div>
+                            <div class="operador">+</div>
+                            <div class="termino"><small>Capital contable</small><strong th:text="${balance.totalCapitalTexto}">$0.00</strong></div>
+                            <div class="operador">=</div>
+                            <div class="termino"><small>Pasivo + capital</small><strong th:text="${balance.totalPasivoCapitalTexto}">$0.00</strong></div>
+                        </div>
+                        <div class="ecuacion-2">
+                            Activo − Pasivo = Capital contable:
+                            <strong th:text="${balance.totalActivoTexto + ' − ' + balance.totalPasivoTexto + ' = ' + balance.capitalCalculadoTexto}">$0 − $0 = $0</strong>
+                            <span th:unless="${balance.cuadra}" th:text="${'(el capital registrado es ' + balance.totalCapitalTexto + ')'}"></span>
+                        </div>
+                        <ul class="pistas" th:unless="${balance.cuadra}">
+                            <li th:each="p : ${balance.pistas}" th:text="${p}">Pista</li>
+                        </ul>
+                        <details class="detalle-sumas">
+                            <summary>Ver sumas por clasificación y razones financieras</summary>
+                            <table class="tabla-sumas">
+                                <tbody>
+                                <tr th:each="s : ${balance.sumas}" th:class="${s.esTotal} ? 'es-total' : ''">
+                                    <td th:text="${s.clasificacion}">Activo circulante</td>
+                                    <td class="text-muted small" th:text="${s.esTotal ? '' : (s.plazo ?: '')}">Corto plazo</td>
+                                    <td class="text-muted small" th:text="${s.esTotal} ? '' : (${s.cuentas == 1} ? '1 cuenta' : ${s.cuentas + ' cuentas'})">0 cuentas</td>
+                                    <td class="num" th:text="${s.totalTexto}">$0.00</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <div class="razones">
+                                <div class="razon"><small>Capital de trabajo (AC − PC)</small><strong th:text="${balance.capitalTrabajoTexto}">$0.00</strong></div>
+                                <div class="razon"><small>Razón circulante (AC ÷ PC)</small><strong th:text="${balance.razonCirculanteTexto}">—</strong></div>
+                                <div class="razon"><small>Endeudamiento (Pasivo ÷ Activo)</small><strong th:text="${balance.endeudamientoTexto}">—</strong></div>
+                            </div>
+                        </details>
+                    </section>
+
+                    <div class="avisos" th:if="${!#lists.isEmpty(balance.advertencias)}">
+                        <strong><i class="bi bi-exclamation-triangle"></i>Revisa estos datos</strong>
+                        <ul><li th:each="a : ${balance.advertencias}" th:text="${a}">Aviso</li></ul>
+                    </div>
+
+                    <!-- Módulo 5: el reporte -->
+                    <article class="hoja">
+                        <header class="hoja-encabezado">
+                            <p class="hoja-empresa" th:text="${empresa.nombre}">EMPRESA</p>
+                            <h3 class="hoja-titulo" th:text="${balance.titulo}">Balance general</h3>
+                            <p class="hoja-fecha" th:text="${balance.fechaTexto}">Al 31 de diciembre de 2026</p>
+                            <p class="hoja-cifras">(Cifras en pesos mexicanos)</p>
+                        </header>
+                        <p class="hoja-vacia" th:if="${balance.vacio}">
+                            No hay cuentas con importe en este balance. Regístralas con el formulario de la izquierda
+                            o elige otra fecha.
+                        </p>
+
+                        <div class="hoja-tabla" th:unless="${balance.vacio}">
+                            <table class="estado">
+                                <tbody>
+                                <tr th:each="l : ${balance.lineas}" th:class="${'fila-' + l.estilo}">
+                                    <td class="concepto" th:classappend="${'s' + l.sangria}" th:text="${l.concepto}">Concepto</td>
+                                    <td class="coment" th:text="${l.comentario}"></td>
+                                    <td class="monto" th:each="c : ${l.celdas}"
+                                        th:classappend="${c != null and c.subrayado != null} ? ${'raya-' + c.subrayado}">
+                                        <div class="m" th:if="${c != null}">
+                                            <span class="pesos" th:if="${c.pesos}">$</span>
+                                            <span class="cifra" th:classappend="${c.negativo} ? 'neg'" th:text="${c.texto}">0.00</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="hoja-pie" th:text="${'Elaborado el ' + balance.elaborado}">Elaborado el …</p>
+                    </article>
+                    <p class="nota-omitidas" th:if="${!#lists.isEmpty(balance.omitidas)}">
+                        <i class="bi bi-eye-slash me-1"></i>
+                        <span th:text="${'No se muestran ' + #lists.size(balance.omitidas) + ' cuenta(s) en $0.00: ' + #strings.listJoin(balance.omitidas, ', ') + '.'}">No se muestran cuentas en cero.</span>
+                    </p>
+                </div>
+
+                <!-- ============ Comparativo ============ -->
+                <div class="tab-pane fade" id="pane-COMP" role="tabpanel" th:if="${comparativo != null}">
+                    <article class="hoja">
+                        <header class="hoja-encabezado">
+                            <p class="hoja-empresa" th:text="${comparativo.empresa}">EMPRESA</p>
+                            <h3 class="hoja-titulo" th:text="${comparativo.titulo}">Balance general comparativo</h3>
+                            <p class="comp-fechas" th:text="${comparativo.fechaActualTexto + ' y ' + #strings.toLowerCase(comparativo.fechaAnteriorTexto)}">Al … y al …</p>
+                            <p class="hoja-cifras">(Cifras en pesos mexicanos)</p>
+                        </header>
+                        <p class="hoja-vacia" th:if="${#lists.isEmpty(comparativo.filas)}">Ninguna de las dos fechas tiene cuentas con importe.</p>
+                        <div class="hoja-tabla" th:unless="${#lists.isEmpty(comparativo.filas)}">
+                            <table class="estado">
+                                <thead>
+                                <tr>
+                                    <th></th>
+                                    <th th:text="${comparativo.etiquetaActual}">2026</th>
+                                    <th th:text="${comparativo.etiquetaAnterior}">2025</th>
+                                    <th>Variación $</th>
+                                    <th>Variación %</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="f : ${comparativo.filas}" th:class="${'fila-' + f.estilo}">
+                                    <td class="concepto" th:classappend="${'s' + f.sangria}" th:text="${f.concepto}">Concepto</td>
+                                    <th:block th:if="${f.encabezado}"><td></td><td></td><td></td><td></td></th:block>
+                                    <th:block th:unless="${f.encabezado}">
+                                        <td class="monto" th:with="c=${f.actual}" th:classappend="${c.subrayado != null} ? ${'raya-' + c.subrayado}">
+                                            <div class="m"><span class="pesos" th:if="${c.pesos}">$</span><span class="cifra" th:classappend="${c.negativo} ? 'neg'" th:text="${c.texto}">0.00</span></div>
+                                        </td>
+                                        <td class="monto" th:with="c=${f.anterior}" th:classappend="${c.subrayado != null} ? ${'raya-' + c.subrayado}">
+                                            <div class="m"><span class="pesos" th:if="${c.pesos}">$</span><span class="cifra" th:classappend="${c.negativo} ? 'neg'" th:text="${c.texto}">0.00</span></div>
+                                        </td>
+                                        <td class="monto" th:with="c=${f.variacion}" th:classappend="${c.subrayado != null} ? ${'raya-' + c.subrayado}">
+                                            <div class="m"><span class="pesos" th:if="${c.pesos}">$</span><span class="cifra" th:classappend="${c.negativo} ? 'neg'" th:text="${c.texto}">0.00</span></div>
+                                        </td>
+                                        <td class="pct" th:text="${f.porcentaje}">0 %</td>
+                                    </th:block>
+                                </tr>
+                                <tr class="fila-ecuacion">
+                                    <td class="concepto">¿Cumple Activo = Pasivo + Capital?</td>
+                                    <td class="pct" th:text="${comparativo.cuadraActual} ? 'Sí' : ('No (' + ${comparativo.diferenciaActual} + ')')">Sí</td>
+                                    <td class="pct" th:text="${comparativo.cuadraAnterior} ? 'Sí' : ('No (' + ${comparativo.diferenciaAnterior} + ')')">Sí</td>
+                                    <td></td><td></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+                </div>
+
+                <!-- ============ Cuentas registradas en este balance ============ -->
+                <div class="tab-pane fade" id="pane-CTA" role="tabpanel">
+                    <div class="tabla-mov">
+                        <div class="tabla-mov-cabeza">
+                            <span th:text="${'Cuentas registradas ' + periodoTexto}">Cuentas registradas</span>
+                            <div class="acciones">
+                                <button type="button" class="link-boton" data-bs-toggle="modal" data-bs-target="#modalCopiar"
+                                        th:if="${dinamico or #lists.size(fechas) > 1 or (#lists.size(fechas) == 1 and #lists.isEmpty(saldos))}">
+                                    <i class="bi bi-copy"></i> <th:block th:text="${dinamico} ? 'Copiar del año anterior' : 'Copiar de otra fecha'">Copiar de otra fecha</th:block>
+                                </button>
+                                <button type="button" class="link-boton link-peligro" data-bs-toggle="modal" data-bs-target="#modalBorrarBalance"
+                                        th:if="${!#lists.isEmpty(saldos)}">
+                                    <i class="bi bi-trash3"></i> <th:block th:text="${dinamico} ? 'Borrar las del periodo' : 'Borrar este balance'">Borrar este balance</th:block>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="vacio" th:if="${#lists.isEmpty(saldos)}">
+                            <i class="bi bi-journal-text"></i>
+                            Todavía no hay cuentas registradas <span th:text="${periodoTexto}"></span>.<br>
+                            Regístralas con el formulario de la izquierda<th:block th:unless="${#lists.isEmpty(fechas)}"> o copia las de otra fecha</th:block>.
+                        </div>
+                        <div class="barra-filtro" th:unless="${#lists.isEmpty(saldos)}" data-filtra="#tablaSaldos tbody tr[data-seccion]">
+                            <div class="input-group input-group-sm caja-busqueda">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input type="search" class="form-control filtro-texto" placeholder="Buscar cuenta…" aria-label="Buscar en las cuentas registradas">
+                            </div>
+                            <div class="filtros">
+                                <button type="button" class="filtro activo" data-seccion="">Todas</button>
+                                <button type="button" class="filtro" data-seccion="ACTIVO">Activo</button>
+                                <button type="button" class="filtro" data-seccion="PASIVO">Pasivo</button>
+                                <button type="button" class="filtro" data-seccion="CAPITAL">Capital</button>
+                                <span class="filtro-sep"></span>
+                                <button type="button" class="filtro" data-plazo="Corto plazo">Corto plazo</button>
+                                <button type="button" class="filtro" data-plazo="Largo plazo">Largo plazo</button>
+                                <button type="button" class="filtro" data-resta="1">Restan</button>
+                            </div>
+                            <span class="filtro-conteo"></span>
+                        </div>
+                        <div class="table-responsive" th:unless="${#lists.isEmpty(saldos)}">
+                            <table class="table align-middle" id="tablaSaldos">
+                                <thead>
+                                <tr>
+                                    <th th:if="${dinamico}">Fecha</th>
+                                    <th>Cuenta</th>
+                                    <th>Clasificación</th>
+                                    <th>Comentario</th>
+                                    <th class="text-end">Importe</th>
+                                    <th></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="s : ${saldos}" th:classappend="${s.enCero} ? 'en-cero'"
+                                    th:data-buscar="${s.nombre + ' ' + (s.comentario ?: '')}" th:data-seccion="${s.clasificacion.seccion.codigo}"
+                                    th:data-plazo="${s.clasificacion.plazo}" th:data-resta="${s.resta}">
+                                    <td class="text-muted text-nowrap" th:if="${dinamico}" th:text="${s.fechaTexto}">31/12/2026</td>
+                                    <td class="fw-semibold">
+                                        <span th:text="${s.nombre}">Caja</span>
+                                        <span class="chip chip-resta ms-1" th:if="${s.resta}">resta</span>
+                                        <span class="chip chip-cero ms-1" th:if="${s.enCero}" title="Las cuentas en $0.00 no aparecen en el reporte">no sale</span>
+                                    </td>
+                                    <td>
+                                        <span class="chip" th:classappend="${s.clasificacion.seccion.chip}" th:text="${s.clasificacion.seccion.nombre}">Activo</span>
+                                        <span class="sub" th:text="${s.clasificacion.encabezado}">Circulante</span>
+                                    </td>
+                                    <td class="text-muted small" th:text="${s.comentario}"></td>
+                                    <td class="text-end num" th:text="${s.importeTexto}">$0.00</td>
+                                    <td class="text-end text-nowrap">
+                                        <button type="button" class="btn-icono" title="Editar"
+                                                data-bs-toggle="modal" data-bs-target="#modalEditar"
+                                                th:data-id="${s.id}" th:data-fecha="${s.fecha}" th:data-nombre="${s.nombre}"
+                                                th:data-clasif="${s.clasificacion.codigo}" th:data-resta="${s.resta}"
+                                                th:data-importe="${s.importe}" th:data-comentario="${s.comentario}">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button type="button" class="btn-icono peligro" title="Quitar del balance"
+                                                data-bs-toggle="modal" data-bs-target="#modalEliminar"
+                                                th:data-url="@{/saldos/{id}/eliminar(id=${s.id})}"
+                                                th:data-nombre="${s.nombre}"
+                                                th:data-detalle="${s.clasificacion.nombre + ' · ' + s.fechaTexto}"
+                                                th:data-importe="${s.importeTexto}">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="sin-coincidencias" hidden><td colspan="6" class="text-center text-muted py-4">Ninguna cuenta coincide con la búsqueda.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============ Catálogo de cuentas ============ -->
+                <div class="tab-pane fade" id="pane-CAT" role="tabpanel">
+                    <div class="cat-cabeza">
+                        <span>Estas son las cuentas que aparecen en “Cuenta”. Quitar una del catálogo no cambia los balances donde ya se usó.</span>
+                        <button type="button" class="btn btn-suave btn-sm" data-bs-toggle="modal" data-bs-target="#modalCuenta">
+                            <i class="bi bi-plus-lg me-1"></i>Agregar cuenta
+                        </button>
+                    </div>
+                    <div class="barra-filtro solo" data-filtra="#catalogoCuentas li[data-buscar]">
+                        <div class="input-group input-group-sm caja-busqueda">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="search" class="form-control filtro-texto" placeholder="Buscar en el catálogo…" aria-label="Buscar en el catálogo">
+                        </div>
+                        <div class="filtros">
+                            <button type="button" class="filtro activo" data-seccion="">Todas</button>
+                            <button type="button" class="filtro" data-seccion="ACTIVO">Activo</button>
+                            <button type="button" class="filtro" data-seccion="PASIVO">Pasivo</button>
+                            <button type="button" class="filtro" data-seccion="CAPITAL">Capital</button>
+                            <span class="filtro-sep"></span>
+                            <button type="button" class="filtro" data-plazo="Corto plazo">Corto plazo</button>
+                            <button type="button" class="filtro" data-plazo="Largo plazo">Largo plazo</button>
+                            <button type="button" class="filtro" data-resta="1">Restan</button>
+                            <button type="button" class="filtro" data-usada="1" title="Las que ya están en algún balance">Usadas</button>
+                        </div>
+                        <span class="filtro-conteo"></span>
+                    </div>
+                    <div class="catalogo" id="catalogoCuentas">
+                        <section class="cat-seccion" th:each="sec : ${secciones}" th:data-seccion="${sec.codigo}">
+                            <h3><span class="chip" th:classappend="${sec.chip}" th:text="${sec.nombre}">Activo</span></h3>
+                            <p th:text="${sec.descripcion}">Lo que tiene</p>
+                            <th:block th:each="cl : ${clasificaciones}">
+                                <div class="cat-grupo" th:if="${cl.seccion.codigo == sec.codigo}">
+                                    <div class="cat-rubro"><th:block th:text="${cl.encabezado}">Circulante</th:block>
+                                        <span th:text="${'· ' + cl.descripcion}">descripción</span></div>
+                                    <ul class="cat-lista">
+                                        <li class="vacia" th:if="${#lists.isEmpty(catalogoPorClasificacion.get(cl.codigo))}">Sin cuentas</li>
+                                        <li th:each="c : ${catalogoPorClasificacion.get(cl.codigo)}"
+                                            th:with="n=${conteo.get(cl.codigo + '|' + #strings.toLowerCase(c.nombre)) ?: 0}"
+                                            th:data-buscar="${c.nombre}" th:data-seccion="${sec.codigo}" th:data-plazo="${cl.plazo}"
+                                            th:data-resta="${c.resta}" th:data-usada="${n > 0}">
+                                            <span class="nombre" th:text="${c.nombre}">Cuenta</span>
+                                            <span class="chip chip-resta" th:if="${c.resta}">resta</span>
+                                            <span class="usos" th:text="${n == 0 ? '' : (n == 1 ? 'en 1 balance' : 'en ' + n + ' balances')}"></span>
+                                            <button type="button" class="btn-icono peligro" title="Quitar del catálogo"
+                                                    data-bs-toggle="modal" data-bs-target="#modalEliminarCuenta"
+                                                    th:data-url="@{/catalogo/{id}/eliminar(id=${c.id})}"
+                                                    th:data-nombre="${c.nombre}" th:data-clasif="${cl.nombre}"
+                                                    th:data-usos="${n}">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </th:block>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- MODAL: Cuenta nueva (nombre, clasificación e importe) -->
+    <div class="modal fade" id="modalCuenta" tabindex="-1" aria-labelledby="tituloModalCuenta" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <form class="modal-content shadow" id="formNuevaCuenta" novalidate>
+                <div class="modal-body p-4">
+                    <h5 class="fw-bold mb-1" id="tituloModalCuenta">Cuenta nueva</h5>
+                    <p class="text-muted small mb-3">Se guarda en el catálogo de esta empresa. Si escribes el importe, también se registra <strong th:text="${dinamico} ? 'en la fecha del registro que elegiste' : 'en el balance al ' + ${fechaTexto}">en el balance al 31/12/2026</strong>.</p>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="nuevaNombre">Nombre de la cuenta</label>
+                        <input type="text" class="form-control" id="nuevaNombre" placeholder="Ej. Equipo de reparto"
+                               autocomplete="off" maxlength="150">
+                        <div class="invalid-feedback" id="errorNuevaCuenta">Escribe el nombre de la cuenta.</div>
+                        <div class="sugerencia" id="sugerencia"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="nuevaClasif">Clasificación</label>
+                        <select class="form-select" id="nuevaClasif">
+                            <option value="" selected disabled>Elige activo, pasivo o capital…</option>
+                            <optgroup th:each="sec : ${secciones}" th:attr="label=${sec.nombre}">
+                                <th:block th:each="cl : ${clasificaciones}">
+                                    <option th:if="${cl.seccion.codigo == sec.codigo}" th:value="${cl.codigo}" th:text="${cl.etiqueta}"
+                                            th:data-descripcion="${cl.descripcion}">Clasificación</option>
+                                </th:block>
+                            </optgroup>
+                        </select>
+                        <div class="invalid-feedback">Elige la clasificación.</div>
+                        <div class="ayuda" id="nuevaClasifAyuda"></div>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="nuevaResta">
+                        <label class="form-check-label" for="nuevaResta">Es complementaria: <strong>resta</strong>
+                            <span class="text-muted">(depreciación o amortización acumulada, estimación de incobrables, pérdidas)</span></label>
+                    </div>
+                    <div class="mb-1">
+                        <label class="form-label" for="nuevaImporteVisual">Importe <span class="fw-normal text-muted">(opcional)</span></label>
+                        <div class="input-group has-validation">
+                            <span class="input-group-text">$</span>
+                            <input type="text" class="form-control" id="nuevaImporteVisual" inputmode="decimal" autocomplete="off" maxlength="22" placeholder="0.00">
+                        </div>
+                        <div class="ayuda" id="nuevaImporteAyuda">Déjalo vacío para solo agregarla al catálogo.</div>
+                        <input type="hidden" id="nuevaImporte">
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-light px-3" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-guinda px-3" id="btnAgregarCuenta"><i class="bi bi-plus-lg me-1"></i>Agregar cuenta</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: Editar cuenta del balance -->
+    <div class="modal fade" id="modalEditar" tabindex="-1" aria-labelledby="tituloModalEditar" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <form class="modal-content shadow" id="formEditar" th:action="@{/saldos}" method="post" novalidate>
+                <div class="modal-body p-4">
+                    <h5 class="fw-bold mb-3" id="tituloModalEditar">Editar cuenta del balance</h5>
+                    <input type="hidden" name="id" id="editId">
+                    <input type="hidden" name="cuentaId" id="editCuentaId">
+                    <input type="hidden" name="importe" id="editImporte">
+
+                    <div class="mb-3">
+                        <label class="form-label" for="editCuenta">Cuenta</label>
+                        <select class="form-select" id="editCuenta"></select>
+                        <div class="clasif-info" id="editInfoClasif"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="editImporteVisual">Importe</label>
+                        <div class="input-group has-validation">
+                            <span class="input-group-text">$</span>
+                            <input type="text" class="form-control" id="editImporteVisual" inputmode="decimal" autocomplete="off" maxlength="22">
+                        </div>
+                        <div class="ayuda" id="editImporteAyuda"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="editComentario">Comentario <span class="fw-normal text-muted">(opcional)</span></label>
+                        <input type="text" class="form-control" id="editComentario" name="comentario" maxlength="255" autocomplete="off">
+                    </div>
+                    <div class="mb-1">
+                        <label class="form-label" for="editFecha">Fecha del balance</label>
+                        <input type="date" class="form-control" id="editFecha" name="fecha" required min="1900-01-01" max="2100-12-31">
+                        <div class="invalid-feedback">Escribe la fecha.</div>
+                        <div class="ayuda">Cámbiala solo si la registraste en el balance equivocado.</div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-light px-3" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-guinda px-3" id="btnGuardarEdicion"><i class="bi bi-check2 me-1"></i>Guardar cambios</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: Quitar cuenta del balance -->
+    <div class="modal fade" id="modalEliminar" tabindex="-1" aria-labelledby="tituloModalEliminar" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-body p-4">
+                    <div class="icono-peligro"><i class="bi bi-trash3"></i></div>
+                    <h5 class="fw-bold mb-1" id="tituloModalEliminar">¿Quitar esta cuenta del balance?</h5>
+                    <p class="text-muted small mb-3">Se quita solo de este balance; sigue en el catálogo. No se puede deshacer.</p>
+                    <div class="resumen-mov">
+                        <div>
+                            <div class="fw-semibold" id="elimNombre">Cuenta</div>
+                            <div class="small text-muted" id="elimDetalle"></div>
+                        </div>
+                        <div class="num" id="elimImporte">$0.00</div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-light px-3" data-bs-dismiss="modal">Cancelar</button>
+                        <form id="formEliminar" method="post" action="#">
+                            <button type="submit" class="btn btn-danger px-3"><i class="bi bi-trash3 me-1"></i>Sí, quitar</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
+    <!-- MODAL: Quitar cuenta del catálogo -->
+    <div class="modal fade" id="modalEliminarCuenta" tabindex="-1" aria-labelledby="tituloModalEliminarCuenta" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-body p-4">
+                    <div class="icono-peligro"><i class="bi bi-x-lg"></i></div>
+                    <h5 class="fw-bold mb-1" id="tituloModalEliminarCuenta">¿Quitar esta cuenta del catálogo?</h5>
+                    <p class="text-muted small mb-3">Ya no aparecerá en “Cuenta”. Los balances donde ya está <strong>no cambian</strong>.</p>
+                    <div class="resumen-mov">
+                        <div>
+                            <div class="fw-semibold" id="elimCuentaNombre">Cuenta</div>
+                            <div class="small text-muted" id="elimCuentaClasif"></div>
+                        </div>
+                        <div class="small text-muted text-end" id="elimCuentaUsos"></div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-light px-3" data-bs-dismiss="modal">Cancelar</button>
+                        <form id="formEliminarCuenta" method="post" action="#">
+                            <button type="submit" class="btn btn-danger px-3">Sí, quitar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Borrar el balance de esta fecha -->
+    <div class="modal fade" id="modalBorrarBalance" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-body p-4">
+                    <div class="icono-peligro"><i class="bi bi-trash3"></i></div>
+                    <h5 class="fw-bold mb-2" th:text="${'¿Borrar las cuentas registradas ' + periodoTexto + '?'}">¿Borrar el balance?</h5>
+                    <p class="text-muted mb-4">
+                        Se quitarán <strong th:text="${#lists.size(saldos)}">0</strong> cuentas registradas.
+                        Lo de otras fechas y el catálogo no se tocan. No se puede deshacer.
+                    </p>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-light px-3" data-bs-dismiss="modal">Cancelar</button>
+                        <form th:action="@{/balance/borrar}" method="post">
+                            <button type="submit" class="btn btn-danger px-3">Sí, borrar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Copiar cuentas de otra fecha (estático) o del año anterior (dinámico) -->
+    <div class="modal fade" id="modalCopiar" tabindex="-1" aria-labelledby="tituloCopiar" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <form class="modal-content shadow" th:action="@{/balance/copiar}" method="post" id="formCopiar">
+                <div class="modal-body p-4" th:unless="${dinamico}">
+                    <h5 class="fw-bold mb-1" id="tituloCopiar">Copiar cuentas de otra fecha</h5>
+                    <p class="text-muted small mb-3">Las cuentas de esa fecha, con sus importes, se agregan al balance al
+                        <strong th:text="${fechaTexto}">31/12/2026</strong>. Las que ya estén aquí no se tocan. Luego ajustas los importes.</p>
+                    <label class="form-label" for="copiarOrigen">Copiar del balance al</label>
+                    <select class="form-select" id="copiarOrigen" name="origen" required>
+                        <th:block th:each="f : ${fechas}">
+                            <option th:if="${f.iso != fechaIso}" th:value="${f.iso}" th:text="${f.texto + ' (' + f.cuentas + ' cuentas)'}">31/12/2025</option>
+                        </th:block>
+                    </select>
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-light px-3" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-guinda px-3"><i class="bi bi-copy me-1"></i>Copiar</button>
+                    </div>
+                </div>
+                <div class="modal-body p-4" th:if="${dinamico}">
+                    <input type="hidden" name="modo" value="PERIODO">
+                    <h5 class="fw-bold mb-1">Copiar del año anterior</h5>
+                    <p class="text-muted small mb-3">Se copian todos los registros <strong th:text="${anteriorTexto}">del 01/01/2025 al 31/12/2025</strong>
+                        a este periodo, con las mismas cuentas, importes y fechas, pero un año después
+                        (lo del 10/01 del año pasado queda el 10/01 de este año). Lo que ya esté aquí no se toca.
+                        Luego nada más ajustas los importes con el lápiz.</p>
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-light px-3" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-guinda px-3"><i class="bi bi-copy me-1"></i>Copiar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: El balance no cuadra, ¿PDF de todos modos? -->
+    <div class="modal fade" id="modalNoCuadra" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-body p-4">
+                    <div class="icono-peligro"><i class="bi bi-exclamation-triangle"></i></div>
+                    <h5 class="fw-bold mb-2">El balance no cuadra</h5>
+                    <p class="text-muted mb-4">El activo no es igual al pasivo más el capital (diferencia
+                        <strong th:text="${balance.diferenciaTexto}">$0.00</strong>). Si generas el PDF así, llevará una nota al final.</p>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-light px-3" data-bs-dismiss="modal">Mejor lo corrijo</button>
+                        <button type="button" class="btn btn-guinda px-3" id="btnPdfIgual">Generar de todos modos</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Nueva empresa -->
+    <div class="modal fade" id="modalNuevaEmpresa" tabindex="-1" aria-labelledby="tituloNuevaEmpresa" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <form class="modal-content shadow" th:action="@{/empresas}" method="post">
+                <div class="modal-body p-4">
+                    <h5 class="fw-bold mb-1" id="tituloNuevaEmpresa">Nueva empresa</h5>
+                    <p class="text-muted small mb-3">Nace con un catálogo de cuentas de activo, pasivo y capital listo para usarse. Luego le puedes agregar o quitar cuentas.</p>
+                    <label class="form-label" for="nombreNuevaEmpresa">Nombre de la empresa</label>
+                    <input type="text" class="form-control" id="nombreNuevaEmpresa" name="nombre" maxlength="150" required autocomplete="off">
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-light px-3" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-guinda px-3"><i class="bi bi-plus-lg me-1"></i>Crear empresa</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: Configurar empresa -->
+    <div class="modal fade" id="modalConfigEmpresa" tabindex="-1" aria-labelledby="tituloConfigEmpresa" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow">
+                <form class="modal-body p-4" th:action="@{/empresas/configurar}" method="post">
+                    <h5 class="fw-bold mb-3" id="tituloConfigEmpresa">Configurar empresa</h5>
+                    <div class="mb-3">
+                        <label class="form-label" for="cfgNombre">Nombre</label>
+                        <input type="text" class="form-control" id="cfgNombre" name="nombre" maxlength="150" required th:value="${empresa.nombre}">
+                    </div>
+                    <div class="mb-1">
+                        <label class="form-label" for="cfgOrden">Orden de las cuentas en el balance</label>
+                        <select class="form-select" id="cfgOrden" name="orden">
+                            <option value="CATALOGO" th:selected="${empresa.ordenCuentas == 'CATALOGO'}">Catálogo</option>
+                            <option value="ALFABETICO" th:selected="${empresa.ordenCuentas == 'ALFABETICO'}">Alfabético</option>
+                            <option value="CAPTURA" th:selected="${empresa.ordenCuentas == 'CAPTURA'}">Fecha de captura</option>
+                        </select>
+                        <div class="ayuda">Catálogo: el activo de lo más disponible a lo menos (Caja, Bancos, Clientes…) y el pasivo de lo que se paga primero a lo último.</div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-light px-3" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-guinda px-3"><i class="bi bi-check2 me-1"></i>Guardar</button>
+                    </div>
+                    <div class="zona-peligro">
+                        <p>Eliminar la empresa borra también todos sus balances y su catálogo.</p>
+                        <button type="button" class="btn btn-outline-danger btn-sm text-nowrap" data-bs-toggle="modal" data-bs-target="#modalEliminarEmpresa">
+                            Eliminar empresa
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Eliminar empresa -->
+    <div class="modal fade" id="modalEliminarEmpresa" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-body p-4">
+                    <div class="icono-peligro"><i class="bi bi-building-x"></i></div>
+                    <h5 class="fw-bold mb-2">¿Eliminar <span th:text="${empresa.nombre}">la empresa</span>?</h5>
+                    <p class="text-muted mb-4">Se borrarán todos sus balances (de todas las fechas) y su catálogo de cuentas. No se puede deshacer.</p>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-light px-3" data-bs-dismiss="modal">Cancelar</button>
+                        <form th:action="@{/empresas/eliminar}" method="post">
+                            <button type="submit" class="btn btn-danger px-3">Sí, eliminar empresa</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
 
 <!-- Avisos -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3" id="contenedorToasts">
@@ -501,9 +1151,21 @@
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
         </div>
     </div>
+    <div class="toast text-bg-warning" role="status" th:if="${alerta}" data-auto>
+        <div class="d-flex">
+            <div class="toast-body"><i class="bi bi-exclamation-circle me-2"></i><span th:text="${alerta}"></span></div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
     <div class="toast text-bg-danger" role="alert" th:if="${error}" data-auto>
         <div class="d-flex">
             <div class="toast-body"><i class="bi bi-exclamation-triangle me-2"></i><span th:text="${error}"></span></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+    <div class="toast text-bg-danger" role="alert" th:if="${errorFecha}" data-auto>
+        <div class="d-flex">
+            <div class="toast-body"><i class="bi bi-calendar-x me-2"></i><span th:text="${errorFecha}"></span></div>
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
         </div>
     </div>
@@ -512,80 +1174,74 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script th:inline="javascript">
-    const URL_REPORTE = /*[[@{/api/reporte}]]*/ '/api/reporte';
+    const CONFIG = {
+        urlInicio: /*[[@{/}]]*/ '/',
+        urlBalance: /*[[@{/api/balance}]]*/ '/api/balance',
+        urlComparativo: /*[[@{/api/comparativo}]]*/ '/api/comparativo',
+        urlCuentas: /*[[@{/api/cuentas}]]*/ '/api/cuentas',
+        urlSugerir: /*[[@{/api/sugerir}]]*/ '/api/sugerir',
+        pestana: /*[[${pestana}]]*/ null,
+        fecha: /*[[${fechaIso}]]*/ null,
+        cuadra: /*[[${balance != null ? balance.cuadra : true}]]*/ true,
+        vacio: /*[[${balance != null ? balance.vacio : true}]]*/ true
+    };
 </script>
 
 <!-- ================= Motor del PDF (formato contable clásico) ================= -->
 <script th:inline="none">
     // PDF-ENGINE-START
     const PDFContable = (() => {
-        const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
-            'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-
-        // Márgenes y medidas en milímetros (hoja carta)
+        // Medidas en milímetros (hoja carta)
         const M = { izq: 18, der: 18, sup: 16, inf: 16 };
-        const ANCHO_COL = 25.5, SEP_COL = 2.5, ALTO_LINEA = 5.6, SANGRIA = 4.5;
-        const FUENTE = 'times', TAM = 10.5;
+        const ANCHO_COL = 27, SEP_COL = 3, ALTO_LINEA = 5.6, SANGRIA = 4.5;
+        const FUENTE = 'times', TAM = 10.5, TAM_MIN_CIFRAS = 6;
+        const TINTA = [25, 22, 24];
 
-        function partes(iso) {
-            if (!iso) return null;
-            const [a, m, d] = iso.split('-').map(Number);
-            return { a, m, d };
+        // Las fuentes estándar del PDF solo traen el alfabeto "occidental" (acentos, ñ, €, comillas…).
+        // Lo demás (emojis, chino, ≠, etc.) se quita para que no salga basura.
+        const NO_SOPORTADO = /[^\x20-\x7E\xA0-\xFF€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ]/gu;
+        function limpiar(texto) {
+            return String(texto ?? '').replace(/−/g, '-').replace(NO_SOPORTADO, '')
+                .replace(/\s{2,}/g, ' ').replace(/\s+([,.;:])/g, '$1').trim();
         }
 
-        function fechaLarga(iso) {
-            const p = partes(iso);
-            return p ? `${p.d} de ${MESES[p.m - 1]} de ${p.a}` : '';
-        }
-
-        /** "Del 1 de enero al 31 de diciembre de 2025" */
-        function periodo(inicio, fin) {
-            const i = partes(inicio), f = partes(fin);
-            if (i && f) {
-                if (i.a === f.a && i.m === f.m) return `Del ${i.d} al ${f.d} de ${MESES[f.m - 1]} de ${f.a}`;
-                if (i.a === f.a) return `Del ${i.d} de ${MESES[i.m - 1]} al ${fechaLarga(fin)}`;
-                return `Del ${fechaLarga(inicio)} al ${fechaLarga(fin)}`;
-            }
-            if (f) return `Al ${fechaLarga(fin)}`;
-            if (i) return `A partir del ${fechaLarga(inicio)}`;
-            return '';
-        }
-
-        function encabezado(doc, estado, meta, continuacion) {
+        /** Encabezado centrado: empresa, título, fecha y "(Cifras en pesos mexicanos)". */
+        function encabezado(doc, datos, continuacion) {
             const W = doc.internal.pageSize.getWidth();
             const centro = W / 2, ancho = W - M.izq - M.der;
             let y = M.sup + 4;
-            doc.setTextColor(25, 22, 24);
+            doc.setTextColor(...TINTA);
 
             doc.setFont(FUENTE, 'bold');
             doc.setFontSize(14);
-            doc.splitTextToSize((meta.empresa || 'Nombre de la empresa').toUpperCase(), ancho).forEach(t => {
+            doc.splitTextToSize(limpiar(datos.empresa || 'Empresa').toUpperCase(), ancho).forEach(t => {
                 doc.text(t, centro, y, { align: 'center' });
                 y += 6;
             });
 
             y += 0.5;
             doc.setFontSize(12);
-            doc.text(estado.titulo.toUpperCase() + (continuacion ? ' (CONTINUACIÓN)' : ''), centro, y, { align: 'center' });
+            doc.text(limpiar(datos.titulo).toUpperCase() + (continuacion ? ' (CONTINUACIÓN)' : ''), centro, y, { align: 'center' });
             y += 5.6;
 
-            const per = periodo(meta.inicio, meta.fin);
-            if (per) {
-                doc.setFont(FUENTE, 'normal');
-                doc.setFontSize(11);
-                doc.text(per.toUpperCase(), centro, y, { align: 'center' });
-                y += 5;
-            }
+            doc.setFont(FUENTE, 'normal');
+            doc.setFontSize(11);
+            (datos.fechas || []).forEach(f => {
+                doc.splitTextToSize(limpiar(f).toUpperCase(), ancho).forEach(t => {
+                    doc.text(t, centro, y, { align: 'center' });
+                    y += 5;
+                });
+            });
 
             doc.setFont(FUENTE, 'italic');
             doc.setFontSize(9.5);
             doc.setTextColor(95, 90, 93);
             doc.text('(Cifras en pesos mexicanos)', centro, y, { align: 'center' });
-            doc.setTextColor(25, 22, 24);
+            doc.setTextColor(...TINTA);
             y += 4;
 
             // Doble raya bajo el encabezado
-            doc.setDrawColor(25, 22, 24);
+            doc.setDrawColor(...TINTA);
             doc.setLineWidth(0.55);
             doc.line(M.izq, y, W - M.der, y);
             doc.setLineWidth(0.2);
@@ -593,52 +1249,119 @@
             return y + 8;
         }
 
+        const ESTILO_FUENTE = { seccion: 'bold', grupo: 'bold', total: 'bold', subtotal: 'italic', detalle: 'normal' };
+
         function fuenteLinea(doc, l, esc) {
-            const negrita = l.estilo === 'resultado' || l.estilo === 'total' || (l.estilo === 'grupo' && l.sangria === 0);
-            doc.setFont(FUENTE, negrita ? 'bold' : 'normal');
+            doc.setFont(FUENTE, ESTILO_FUENTE[l.estilo] || 'normal');
             doc.setFontSize(TAM * Math.max(esc, 0.9));
         }
 
         function espacioAntes(l, idx) {
             if (idx === 0) return 0;
-            if (l.estilo === 'grupo') return 0.8;
+            if (l.estilo === 'seccion') return 3.2;
+            if (l.estilo === 'grupo') return 1;
             if (l.estilo === 'total') return 1.4;
             return 0;
         }
 
         function textoConcepto(l) {
-            if (l.estilo === 'total') return l.concepto.toUpperCase();
-            if (l.estilo === 'grupo') return l.concepto + ':';
-            return l.concepto;
+            const t = limpiar(l.concepto);
+            if (l.estilo === 'total' || l.estilo === 'seccion') return t.toUpperCase();
+            if (l.estilo === 'grupo') return t + ':';
+            return t;
         }
 
-        function dibujarEstado(doc, estado, meta) {
+        /** Tamaño de letra para las cifras: si la más larga no cabe en su columna, se achica (cifras gigantes). */
+        function tamanoCifras(doc, textos, anchoCol) {
+            doc.setFont(FUENTE, 'bold');
+            doc.setFontSize(TAM);
+            const extra = doc.getTextWidth('$') + 1.8 + doc.getTextWidth(')');
+            let max = 0;
+            textos.forEach(t => { max = Math.max(max, doc.getTextWidth(t)); });
+            const necesario = max + extra;
+            return necesario > anchoCol ? Math.max(TAM_MIN_CIFRAS, TAM * anchoCol / necesario) : TAM;
+        }
+
+        /** Dibuja una cifra alineada a la derecha, con su $ y su raya. */
+        function cifra(doc, c, xi, xd, y, tam, esc) {
+            doc.setFontSize(tam);
+            const parentesis = doc.getTextWidth(')');
+            const texto = limpiar(c.texto);
+            doc.text(texto, c.negativo ? xd : xd - parentesis, y, { align: 'right' });
+            if (c.pesos) doc.text('$', xi + 0.6, y);
+            if (c.subrayado) {
+                const yr = y + 1.5 * Math.max(esc, 0.9);
+                doc.setDrawColor(...TINTA);
+                doc.setLineWidth(0.25);
+                doc.line(xi + 0.5, yr, xd, yr);
+                if (c.subrayado === 'doble') doc.line(xi + 0.5, yr + 0.85, xd, yr + 0.85);
+            }
+        }
+
+        /** Texto en párrafo (para notas al pie). Regresa la nueva y. */
+        function parrafo(doc, texto, x, y, ancho, color, estilo, tam) {
+            doc.setFont(FUENTE, estilo);
+            doc.setFontSize(tam);
+            doc.setTextColor(...color);
+            const lineas = doc.splitTextToSize(limpiar(texto), ancho);
+            lineas.forEach((t, k) => doc.text(t, x, y + k * 4.2));
+            doc.setTextColor(...TINTA);
+            return y + lineas.length * 4.2;
+        }
+
+        // ------------------------------------------------------------------ Balance general
+        function dibujarBalance(doc, b, meta) {
+            const datos = { empresa: b.empresa, titulo: b.titulo, fechas: [b.fechaTexto] };
             const W = doc.internal.pageSize.getWidth();
             const H = doc.internal.pageSize.getHeight();
-            const n = estado.numColumnas;
+            const n = b.numColumnas;
             const derecha = i => W - M.der - (n - 1 - i) * (ANCHO_COL + SEP_COL);
             const izquierda = i => derecha(i) - ANCHO_COL;
             const anchoConcepto = izquierda(0) - 3 - M.izq;
             const limite = H - M.inf - 10;   // deja lugar para el número de página
 
-            let y = encabezado(doc, estado, meta, false);
+            const textos = [];
+            b.lineas.forEach(l => (l.celdas || []).forEach(c => { if (c) textos.push(c.texto); }));
+            const tamCifras = tamanoCifras(doc, textos, ANCHO_COL);
 
-            // Mide el estado y, si no cabe en una hoja, compacta el interlineado (hasta 72 %)
+            let y = encabezado(doc, datos, false);
+
+            // Mide el balance y, si no cabe en una hoja, compacta el interlineado (hasta 72 %)
             const extraComentario = esc => Math.max(0, 7.6 - ALTO_LINEA * esc);
-            const medir = esc => estado.lineas.reduce((total, l, idx) => {
+            const medir = esc => b.lineas.reduce((total, l, idx) => {
                 fuenteLinea(doc, l, esc);
                 const r = doc.splitTextToSize(textoConcepto(l), anchoConcepto - l.sangria * SANGRIA).length;
                 const c = (meta.comentarios && l.comentario) ? extraComentario(esc) : 0;
                 return total + espacioAntes(l, idx) * esc + r * ALTO_LINEA * esc + c;
             }, 0);
-            const disponible = limite - y - 1;
+            // Si cabe en una hoja achicando poquito (hasta 80 %), se achica. Si no, va a tamaño normal y se reparte
+            // en varias hojas sin partir ninguna sección (activo / pasivo / capital) ni clasificación a la mitad.
+            const disponible = limite - y - 14;
             let esc = 1;
             if (medir(1) > disponible) {
-                for (let k = 0; k < 6; k++) esc = Math.max(0.72, esc * disponible / medir(esc));
+                for (let k = 0; k < 6; k++) esc = Math.max(0.8, esc * disponible / medir(esc));
+                if (medir(esc) > disponible) esc = 1;
             }
             const altoLinea = ALTO_LINEA * esc;
+            const altoDe = (l, idx) => {
+                fuenteLinea(doc, l, esc);
+                const r = doc.splitTextToSize(textoConcepto(l), anchoConcepto - l.sangria * SANGRIA).length;
+                const c = (meta.comentarios && l.comentario) ? extraComentario(esc) : 0;
+                return espacioAntes(l, idx) * esc + r * altoLinea + c;
+            };
+            /** Alto del bloque que empieza en idx: una sección hasta su total, o una clasificación hasta su subtotal. */
+            const bloque = idx => {
+                const fin = b.lineas[idx].estilo === 'seccion' ? 'total' : 'subtotal';
+                let alto = 0;
+                for (let k = idx; k < b.lineas.length; k++) {
+                    alto += altoDe(b.lineas[k], k);
+                    if (b.lineas[k].estilo === fin) break;
+                }
+                return alto;
+            };
+            const yInicial = y;
 
-            estado.lineas.forEach((l, idx) => {
+            b.lineas.forEach((l, idx) => {
                 y += espacioAntes(l, idx) * esc;
 
                 const sangria = l.sangria * SANGRIA;
@@ -647,47 +1370,137 @@
 
                 doc.setFontSize(8);
                 const comentario = (meta.comentarios && l.comentario)
-                    ? doc.splitTextToSize(l.comentario, anchoConcepto - sangria) : [];
+                    ? doc.splitTextToSize(limpiar(l.comentario), anchoConcepto - sangria) : [];
                 const alto = renglones.length * altoLinea + comentario.length * 3.6;
 
-                if (y + alto > limite) {
+                // Una sección o clasificación que no cabe completa se pasa a la hoja siguiente (si ahí sí cabe)
+                let saltar = y + alto > limite;
+                if (!saltar && (l.estilo === 'seccion' || l.estilo === 'grupo') && y > yInicial + 1) {
+                    const h = bloque(idx);
+                    saltar = y + h > limite && h <= limite - yInicial;
+                    if (!saltar && l.estilo === 'grupo') saltar = y + alto + altoLinea * 2 > limite;
+                }
+                if (saltar) {
                     doc.addPage();
-                    y = encabezado(doc, estado, meta, true);
+                    y = encabezado(doc, datos, true);
                 }
 
-                // Concepto
                 fuenteLinea(doc, l, esc);
-                doc.setTextColor(25, 22, 24);
+                doc.setTextColor(...TINTA);
                 renglones.forEach((t, k) => doc.text(t, M.izq + sangria, y + k * altoLinea));
                 const yCifra = y + (renglones.length - 1) * altoLinea;
 
-                // Importes por columna
-                const anchoParentesis = doc.getTextWidth(')');
-                (l.celdas || []).forEach((c, i) => {
-                    if (!c) return;
-                    const xd = derecha(i), xi = izquierda(i);
-                    doc.text(c.texto, c.negativo ? xd : xd - anchoParentesis, yCifra, { align: 'right' });
-                    if (c.pesos) doc.text('$', xi + 0.8, yCifra);
-                    if (c.subrayado) {
-                        const yr = yCifra + 1.5 * Math.max(esc, 0.9);
-                        doc.setDrawColor(25, 22, 24);
-                        doc.setLineWidth(0.25);
-                        doc.line(xi + 0.5, yr, xd, yr);
-                        if (c.subrayado === 'doble') doc.line(xi + 0.5, yr + 0.85, xd, yr + 0.85);
-                    }
-                });
+                const tam = Math.min(tamCifras, TAM) * Math.max(esc, 0.9);
+                (l.celdas || []).forEach((c, i) => { if (c) cifra(doc, c, izquierda(i), derecha(i), yCifra, tam, esc); });
                 y += renglones.length * altoLinea;
 
-                // Comentario opcional (pequeño, gris, bajo el concepto)
                 if (comentario.length) {
                     doc.setFont(FUENTE, 'italic');
                     doc.setFontSize(8);
                     doc.setTextColor(110, 104, 108);
                     comentario.forEach((t, k) => doc.text(t, M.izq + sangria + 2, yCifra + 3.4 + k * 3.2));
                     y = Math.max(y, yCifra + 3.4 + (comentario.length - 1) * 3.2 + 4.2);
-                    doc.setTextColor(25, 22, 24);
+                    doc.setTextColor(...TINTA);
                 }
             });
+
+            // Pie: fecha de elaboración y, si no cuadra, la nota
+            const ancho = W - M.izq - M.der;
+            if (y + 16 > limite) { doc.addPage(); y = encabezado(doc, datos, true); }
+            y += 8;
+            doc.setFont(FUENTE, 'italic');
+            doc.setFontSize(9);
+            doc.setTextColor(95, 90, 93);
+            doc.text(limpiar('Elaborado el ' + b.elaborado), W - M.der, y, { align: 'right' });
+            doc.setTextColor(...TINTA);
+            if (meta.noCuadra) {
+                parrafo(doc, 'Nota: este balance NO cumple la ecuación contable (Activo = Pasivo + Capital contable). '
+                    + 'Diferencia: ' + b.diferenciaTexto + '.', M.izq, y + 7, ancho, [179, 38, 30], 'bold', 9.5);
+            }
+        }
+
+        // ------------------------------------------------------------------ Comparativo
+        function dibujarComparativo(doc, comp) {
+            const datos = { empresa: comp.empresa, titulo: comp.titulo,
+                fechas: [comp.fechaActualTexto + ' y ' + comp.fechaAnteriorTexto.toLowerCase()] };
+            const W = doc.internal.pageSize.getWidth();
+            const H = doc.internal.pageSize.getHeight();
+            const COLS = [28, 28, 28, 19];          // actual, anterior, variación $, variación %
+            const SEP = 3;
+            const derecha = [];
+            let x = W - M.der;
+            for (let i = COLS.length - 1; i >= 0; i--) { derecha[i] = x; x -= COLS[i] + SEP; }
+            const izquierda = i => derecha[i] - COLS[i];
+            const anchoConcepto = izquierda(0) - 3 - M.izq;
+            const limite = H - M.inf - 10;
+
+            const textos = [];
+            comp.filas.forEach(f => { if (!f.encabezado) [f.actual, f.anterior, f.variacion].forEach(c => textos.push(c.texto)); });
+            const tamCifras = tamanoCifras(doc, textos, COLS[0]);
+
+            const cabeceraColumnas = y => {
+                doc.setFont(FUENTE, 'bold');
+                doc.setFontSize(9.5);
+                const titulos = [comp.etiquetaActual, comp.etiquetaAnterior, 'Variación $', 'Variación %'];
+                let alto = 0;
+                titulos.forEach((t, i) => {
+                    const lineas = doc.splitTextToSize(limpiar(t), COLS[i]);
+                    lineas.forEach((ln, k) => doc.text(ln, derecha[i], y + k * 4, { align: 'right' }));
+                    alto = Math.max(alto, lineas.length);
+                });
+                const yLinea = y + (alto - 1) * 4 + 2;
+                doc.setDrawColor(150, 144, 147);
+                doc.setLineWidth(0.2);
+                doc.line(izquierda(0), yLinea, W - M.der, yLinea);
+                return yLinea + 6;
+            };
+
+            let y = cabeceraColumnas(encabezado(doc, datos, false));
+            const yInicial = y;
+            const altoFila = (f, idx) => {
+                doc.setFont(FUENTE, ESTILO_FUENTE[f.estilo] || 'normal');
+                doc.setFontSize(TAM);
+                return espacioAntes(f, idx) + doc.splitTextToSize(textoConcepto(f), anchoConcepto - f.sangria * SANGRIA).length * ALTO_LINEA;
+            };
+            comp.filas.forEach((f, idx) => {
+                // Una sección o clasificación que no cabe completa se pasa a la hoja siguiente (si ahí sí cabe)
+                let saltar = y + altoFila(f, idx) > limite;
+                if (!saltar && f.encabezado && y > yInicial + 1) {
+                    const fin = f.estilo === 'seccion' ? 'total' : 'subtotal';
+                    let h = 0;
+                    for (let k = idx; k < comp.filas.length; k++) { h += altoFila(comp.filas[k], k); if (comp.filas[k].estilo === fin) break; }
+                    saltar = (y + h > limite && h <= limite - yInicial) || y + ALTO_LINEA * 3 > limite;
+                }
+                y += espacioAntes(f, idx);
+                if (saltar) {
+                    doc.addPage();
+                    y = cabeceraColumnas(encabezado(doc, datos, true));
+                }
+                doc.setFont(FUENTE, ESTILO_FUENTE[f.estilo] || 'normal');
+                doc.setFontSize(TAM);
+                doc.setTextColor(...TINTA);
+                const renglones = doc.splitTextToSize(textoConcepto(f), anchoConcepto - f.sangria * SANGRIA);
+                renglones.forEach((t, k) => doc.text(t, M.izq + f.sangria * SANGRIA, y + k * ALTO_LINEA));
+                const yc = y + (renglones.length - 1) * ALTO_LINEA;
+                if (!f.encabezado) {
+                    [f.actual, f.anterior, f.variacion].forEach((c, i) => cifra(doc, c, izquierda(i), derecha[i], yc, Math.min(tamCifras, TAM), 1));
+                    doc.setFont(FUENTE, 'normal');
+                    doc.setFontSize(TAM);
+                    doc.text(limpiar(f.porcentaje), derecha[3], yc, { align: 'right' });
+                }
+                y += renglones.length * ALTO_LINEA;
+            });
+
+            y += 6;
+            if (y + 6 > limite) { doc.addPage(); y = cabeceraColumnas(encabezado(doc, datos, true)); }
+            doc.setFont(FUENTE, 'italic');
+            doc.setFontSize(TAM);
+            doc.setTextColor(70, 64, 68);
+            doc.text('¿Cumple Activo = Pasivo + Capital contable?', M.izq, y);
+            const si = (ok, dif) => ok ? 'Sí' : 'No (' + dif + ')';
+            doc.text(limpiar(si(comp.cuadraActual, comp.diferenciaActual)), derecha[0], y, { align: 'right' });
+            doc.text(limpiar(si(comp.cuadraAnterior, comp.diferenciaAnterior)), derecha[1], y, { align: 'right' });
+            doc.setTextColor(...TINTA);
         }
 
         function numerarPaginas(doc) {
@@ -703,317 +1516,719 @@
             }
         }
 
-        function crear(reporte, meta) {
-            const doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'letter', orientation: 'portrait' });
-            dibujarEstado(doc, reporte.estadoResultados, meta);
+        function nuevoDoc() {
+            return new window.jspdf.jsPDF({ unit: 'mm', format: 'letter', orientation: 'portrait' });
+        }
+
+        function balance(b, meta) {
+            const doc = nuevoDoc();
+            dibujarBalance(doc, b, meta || {});
             numerarPaginas(doc);
-            doc.setProperties({
-                title: 'Estado de Resultados - ' + (meta.empresa || 'Empresa'),
-                creator: 'Sistema Contable IPN'
-            });
+            doc.setProperties({ title: limpiar('Balance general - ' + b.empresa), creator: 'Sistema Contable IPN' });
             return doc;
         }
 
-        function nombreArchivo(meta) {
-            const limpio = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
-                .replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
-            const empresa = limpio(meta.empresa) || 'Empresa';
-            return `Estado_de_resultados_${empresa}_del_${meta.inicio || 'inicio'}_al_${meta.fin || 'fin'}.pdf`;
+        function comparativo(comp) {
+            const doc = nuevoDoc();
+            dibujarComparativo(doc, comp);
+            numerarPaginas(doc);
+            doc.setProperties({ title: limpiar('Balance comparativo - ' + comp.empresa), creator: 'Sistema Contable IPN' });
+            return doc;
         }
 
-        return { crear, nombreArchivo, periodo };
+        const paraArchivo = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
+            .replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+
+        function nombreBalance(b) {
+            return `Balance_general_${paraArchivo(b.empresa) || 'Empresa'}_${b.dinamico ? 'del_' + b.inicio + '_' : ''}al_${b.fecha}.pdf`;
+        }
+
+        function nombreComparativo(c) {
+            return `Balance_comparativo_${paraArchivo(c.empresa) || 'Empresa'}_${paraArchivo(c.etiquetaActual)}_vs_${paraArchivo(c.etiquetaAnterior)}.pdf`;
+        }
+
+        return { balance, comparativo, nombreBalance, nombreComparativo, limpiar };
     })();
     // PDF-ENGINE-END
 </script>
 
+<!-- ================= Importe: lee "1,500.75", "1500,75", "1.500,75"… y avisa si es ambiguo ================= -->
+<script th:inline="none">
+    // IMPORTE-START
+    const Importe = (() => {
+        const MAX_ENTEROS = 13;   // hasta 9,999,999,999,999.99 (lo que cabe en la base de datos)
+
+        const agrupar = entero => entero.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        const error = mensaje => ({ ok: false, mensaje });
+
+        /** Regresa { ok, valor: "1500.75", texto: "1,500.75", cero, nota } o { ok: false, mensaje } */
+        function leer(texto) {
+            let s = String(texto || '').trim().replace(/\$/g, '').replace(/\s+/g, '');
+            if (!s) return { ok: false, vacio: true, mensaje: 'Escribe el importe.' };
+            if (/^[-−(]/.test(s)) return error('Va sin signo menos. Si la cuenta resta (depreciación, pérdida…), usa una cuenta complementaria.');
+            if (!/^[\d.,]+$/.test(s)) return error('Solo números, coma para miles y punto para decimales.');
+
+            const punto = s.lastIndexOf('.'), coma = s.lastIndexOf(',');
+            let entero, decimales = '', nota = '';
+
+            if (punto >= 0 && coma >= 0) {
+                // Trae los dos: el que va al último es el decimal
+                const sepDecimal = punto > coma ? '.' : ',';
+                const sepMiles = sepDecimal === '.' ? ',' : '.';
+                const partes = s.split(sepDecimal);
+                if (partes.length !== 2) return error('Hay más de un separador decimal.');
+                const miles = new RegExp('^\\d{1,3}(\\' + sepMiles + '\\d{3})+$');
+                if (!miles.test(partes[0])) return error('Los miles no están bien separados.');
+                entero = partes[0].split(sepMiles).join('');
+                decimales = partes[1];
+                if (sepDecimal === ',') nota = 'Lo leí con coma decimal (formato europeo).';
+            } else if (coma >= 0) {
+                if (/^\d{1,3}(,\d{3})+$/.test(s)) {
+                    entero = s.replace(/,/g, '');                         // 1,500  -> mil quinientos
+                } else if (/^\d+,\d{1,2}$/.test(s)) {
+                    [entero, decimales] = s.split(',');                   // 1500,75 -> coma decimal
+                    nota = 'Lo leí con coma decimal (formato europeo).';
+                } else {
+                    return error('No entiendo ese número. Escríbelo así: 1,500.75');
+                }
+            } else if (punto >= 0) {
+                if (/^\d*\.\d{1,2}$/.test(s)) {
+                    [entero, decimales] = s.split('.');                   // 1500.75
+                } else if (/^\d{1,3}(\.\d{3}){2,}$/.test(s)) {
+                    entero = s.replace(/\./g, '');                        // 1.500.000 -> puntos de miles
+                    nota = 'Lo leí con puntos de miles (formato europeo).';
+                } else if (/^[1-9]\d{0,2}\.\d{3}$/.test(s)) {
+                    const [a, b] = s.split('.');
+                    return error(`¿Es ${agrupar(a + b)}.00 o ${a}.${b.slice(0, 2)}? Escríbelo como ${agrupar(a + b)} o ${a}.${b.slice(0, 2)}`);
+                } else {
+                    return error('Máximo 2 decimales. Para miles usa coma: 1,500');
+                }
+            } else {
+                entero = s;
+            }
+
+            entero = (entero || '0').replace(/^0+(?=\d)/, '');
+            if (decimales.length > 2) return error('Máximo 2 decimales.');
+            if (entero.length > MAX_ENTEROS) return error('Es demasiado grande (máximo 9,999,999,999,999.99).');
+            decimales = (decimales + '00').slice(0, 2);
+            const cero = /^0+$/.test(entero) && decimales === '00';
+            return { ok: true, valor: `${entero}.${decimales}`, texto: `${agrupar(entero)}.${decimales}`, cero, nota };
+        }
+
+        /**
+         * Conecta un campo visible con su campo oculto y su texto de ayuda. Regresa { validar, reiniciar }.
+         * opciones.opcional: vacío es válido (se manda vacío).
+         */
+        function conectar(visible, oculto, ayuda, opciones) {
+            const op = opciones || {};
+            const base = op.base || 'Coma para miles y punto para decimales.';
+            const pintar = (r, marcarError) => {
+                ayuda.classList.remove('ok', 'mal');
+                visible.classList.remove('is-invalid');
+                if (r.ok) {
+                    ayuda.textContent = r.cero
+                        ? 'Se guardará en $0.00: no aparecerá en el reporte.'
+                        : `Se registrará: $${r.texto}` + (r.nota ? ' · ' + r.nota : '');
+                    ayuda.classList.add('ok');
+                } else if (r.vacio && (!marcarError || op.opcional)) {
+                    ayuda.textContent = base;
+                } else {
+                    ayuda.textContent = r.mensaje;
+                    ayuda.classList.add('mal');
+                    if (marcarError) visible.classList.add('is-invalid');
+                }
+            };
+            const validar = marcarError => {
+                const r = leer(visible.value);
+                oculto.value = r.ok ? r.valor : '';
+                pintar(r, marcarError);
+                return r.ok || (r.vacio && !!op.opcional);
+            };
+            visible.addEventListener('input', () => validar(false));
+            visible.addEventListener('blur', () => {
+                const r = leer(visible.value);
+                if (r.ok) visible.value = r.texto;
+                validar(!r.vacio);
+            });
+            return { validar, reiniciar: () => { visible.value = ''; oculto.value = ''; pintar({ vacio: true }, false); } };
+        }
+
+        return { leer, conectar };
+    })();
+    // IMPORTE-END
+</script>
+
 <!-- ================= Interfaz ================= -->
 <script th:inline="none">
+    // UI-START
     (() => {
         'use strict';
-
-        const LS_DATOS = 'datosReporteER';
-        const LS_CUENTAS = 'cuentasPersonalizadasER_v3';
-
-        // Catálogo base por rubro (los nombres de rubro son los mismos que define CuentaService)
-        const CATALOGO_BASE = {
-            'Ventas': ['Ventas'],
-            'Devoluciones y descuentos sobre ventas': ['Devoluciones sobre ventas', 'Descuentos sobre ventas', 'Rebajas sobre ventas'],
-            'Inventario inicial': ['Inventario inicial'],
-            'Compras': ['Compras'],
-            'Gastos de compra': ['Gastos de compra', 'Fletes sobre compras'],
-            'Devoluciones y descuentos sobre compras': ['Devoluciones sobre compras', 'Descuentos sobre compras', 'Rebajas sobre compras'],
-            'Inventario final': ['Inventario final'],
-            'Gastos de venta': ['Renta del almacén', 'Propaganda y publicidad', 'Sueldos de agentes y dependientes',
-                'Comisiones de agentes y dependientes', 'Consumo de luz del almacén'],
-            'Gastos de administración': ['Renta de oficinas', 'Sueldos del personal de oficinas', 'Papelería y útiles',
-                'Consumo de luz de las oficinas'],
-            'Productos financieros': ['Intereses cobrados', 'Ganancias en cambios'],
-            'Gastos financieros': ['Intereses pagados', 'Pérdida en cambios'],
-            'Otros gastos': ['Pérdida en venta de mobiliario', 'Pérdida en venta de acciones'],
-            'Otros productos': ['Comisiones cobradas', 'Dividendos cobrados']
-        };
-        const COLOR_SECCION = {
-            'Ventas': 'chip-ventas', 'Costo de ventas': 'chip-costo',
-            'Gastos de operación': 'chip-operacion', 'Otros gastos y productos': 'chip-otros'
-        };
-
         const $ = id => document.getElementById(id);
-        const leer = (k, def) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? def; } catch (e) { return def; } };
-        const guardar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* sin almacenamiento */ } };
-        const igual = (a, b) => a.trim().toLowerCase() === b.trim().toLowerCase();
+        if (!$('selEmpresa')) return;   // pantalla de bienvenida: no hay nada más que conectar
 
-        // Rubro -> sección, leído del modal (lo genera el servidor, así no se duplica la lista)
-        const selRubro = $('selectRubro');
-        const SECCION_DE = {};
-        selRubro.querySelectorAll('optgroup').forEach(g => g.querySelectorAll('option').forEach(o => { SECCION_DE[o.value] = g.label; }));
-        const RUBROS = Object.keys(SECCION_DE);
-
-        // ------------------------------------------------ Datos del reporte
-        const CAMPOS = { empresa: 'nombreEmpresa', inicio: 'fechaInicio', fin: 'fechaFin' };
-
-        function hoyISO(primerDia) {
-            const h = new Date();
-            const mm = String(h.getMonth() + 1).padStart(2, '0');
-            const dd = primerDia ? '01' : String(h.getDate()).padStart(2, '0');
-            return `${h.getFullYear()}-${mm}-${dd}`;
-        }
-
-        const datos = Object.assign({ inicio: hoyISO(true), fin: hoyISO(false), comentarios: false, pestana: '#pane-ER' },
-            leer(LS_DATOS, {}));
-
-        function datosActuales() {
-            const d = { comentarios: $('toggleComentarios').checked };
-            for (const [k, id] of Object.entries(CAMPOS)) d[k] = $(id).value.trim();
-            return d;
-        }
-
-        function formatoCorto(iso) {
-            if (!iso) return '';
-            const [a, m, d] = iso.split('-');
-            return `${d}/${m}/${a}`;
-        }
-
-        function refrescarEncabezados() {
-            const d = datosActuales();
-            document.querySelectorAll('.js-empresa').forEach(el => el.textContent = d.empresa || 'NOMBRE DE LA EMPRESA');
-            document.querySelectorAll('.js-periodo').forEach(el => el.textContent = PDFContable.periodo(d.inicio, d.fin));
-            $('metaPeriodo').textContent = (d.inicio || d.fin) ? `${formatoCorto(d.inicio)} – ${formatoCorto(d.fin)}` : '';
-            guardar(LS_DATOS, Object.assign(leer(LS_DATOS, {}), d));
-        }
-
-        for (const [k, id] of Object.entries(CAMPOS)) {
-            $(id).value = datos[k] || '';
-            $(id).addEventListener('input', refrescarEncabezados);
-        }
-
-        // ------------------------------------------------ Comentarios y pestañas
-        const toggle = $('toggleComentarios');
-        toggle.checked = !!datos.comentarios;
-        const aplicarComentarios = () => document.body.classList.toggle('con-comentarios', toggle.checked);
-        toggle.addEventListener('change', () => { aplicarComentarios(); refrescarEncabezados(); });
-        aplicarComentarios();
-        refrescarEncabezados();
-
-        document.querySelectorAll('[data-bs-toggle="tab"]').forEach(btn => {
-            btn.addEventListener('shown.bs.tab', () => {
-                guardar(LS_DATOS, Object.assign(leer(LS_DATOS, {}), { pestana: btn.dataset.bsTarget }));
-            });
-        });
-        const pestanaGuardada = document.querySelector(`[data-bs-target="${datos.pestana}"]`);
-        if (pestanaGuardada) bootstrap.Tab.getOrCreateInstance(pestanaGuardada).show();
+        const LS = 'preferenciasBalance';
+        const leerPrefs = () => { try { return JSON.parse(localStorage.getItem(LS)) || {}; } catch (e) { return {}; } };
+        const guardarPrefs = cambios => { try { localStorage.setItem(LS, JSON.stringify(Object.assign(leerPrefs(), cambios))); } catch (e) { /* sin almacenamiento */ } };
 
         // ------------------------------------------------ Avisos
         function aviso(mensaje, tipo) {
             const el = document.createElement('div');
-            el.className = `toast text-bg-${tipo === 'error' ? 'danger' : tipo === 'alerta' ? 'warning' : 'dark'}`;
+            const color = { error: 'danger', alerta: 'warning' }[tipo] || 'dark';
+            el.className = `toast text-bg-${color}`;
             el.setAttribute('role', 'status');
             el.innerHTML = '<div class="d-flex"><div class="toast-body"></div>' +
                 '<button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button></div>';
             el.querySelector('.toast-body').textContent = mensaje;
-            if (tipo !== 'alerta') el.querySelector('.btn-close').classList.add('btn-close-white');
+            if (color !== 'warning') el.querySelector('.btn-close').classList.add('btn-close-white');
             $('contenedorToasts').appendChild(el);
             el.addEventListener('hidden.bs.toast', () => el.remove());
-            bootstrap.Toast.getOrCreateInstance(el, { delay: 4000 }).show();
+            bootstrap.Toast.getOrCreateInstance(el, { delay: 6000 }).show();
         }
-        document.querySelectorAll('.toast[data-auto]').forEach(t => bootstrap.Toast.getOrCreateInstance(t, { delay: 3500 }).show());
+        document.querySelectorAll('.toast[data-auto]').forEach(t =>
+            bootstrap.Toast.getOrCreateInstance(t, { delay: t.classList.contains('text-bg-dark') ? 4000 : 8000 }).show());
 
-        // ------------------------------------------------ Catálogo de cuentas
-        const selector = $('selectorCuenta');
-        const infoRubro = $('infoRubro');
-        const campoSeccion = $('campoSeccion');
-        const campoRubro = $('campoRubro');
+        // ------------------------------------------------ Pestañas y comentarios (se recuerdan en este navegador)
+        const prefs = leerPrefs();
+        document.querySelectorAll('[data-bs-toggle="tab"]').forEach(btn =>
+            btn.addEventListener('shown.bs.tab', () => guardarPrefs({ pestana: btn.dataset.bsTarget })));
+        const pestana = document.querySelector(`[data-bs-target="${CONFIG.pestana || prefs.pestana}"]`);
+        if (pestana) bootstrap.Tab.getOrCreateInstance(pestana).show();
 
-        function catalogo() {
-            const cat = {};
-            for (const r of RUBROS) cat[r] = [...(CATALOGO_BASE[r] || [])];
-            for (const c of leer(LS_CUENTAS, [])) {
-                if (!cat[c.rubro]) continue;
-                if (!cat[c.rubro].some(n => igual(n, c.nombre))) cat[c.rubro].push(c.nombre);
-            }
-            return cat;
+        const toggle = $('toggleComentarios');
+        toggle.checked = !!prefs.comentarios;
+        const aplicarComentarios = () => document.body.classList.toggle('con-comentarios', toggle.checked);
+        toggle.addEventListener('change', () => { aplicarComentarios(); guardarPrefs({ comentarios: toggle.checked }); });
+        aplicarComentarios();
+
+        // ------------------------------------------------ Empresa
+        $('selEmpresa').addEventListener('change', ev => {
+            window.location.href = CONFIG.urlInicio + '?empresa=' + encodeURIComponent(ev.target.value);
+        });
+
+        // ------------------------------------------------ Tipo de balance (estático / dinámico) y fechas
+        const fecha = $('fechaBalance'), inicio = $('fechaInicio');
+        const fecha2 = $('fechaComparar'), inicio2 = $('fechaInicio2'), switchComparar = $('switchComparar');
+        const esDinamico = () => $('tipoDinamico').checked;
+        let comparacionTocada = false;
+
+        const iso = f => `${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2, '0')}-${String(f.getDate()).padStart(2, '0')}`;
+        const unAnioAntes = valor => {
+            if (!valor) return '';
+            const [a, m, d] = valor.split('-').map(Number);
+            const ultimo = new Date(a - 1, m, 0).getDate();
+            const finDeMes = d === new Date(a, m, 0).getDate();
+            return iso(new Date(a - 1, m - 1, finDeMes ? ultimo : Math.min(d, ultimo)));
+        };
+        const sugerirComparacion = () => {
+            if (comparacionTocada) return;
+            fecha2.value = unAnioAntes(fecha.value);
+            inicio2.value = unAnioAntes(inicio.value);
+        };
+
+        function aplicarTipo() {
+            const din = esDinamico();
+            $('colInicio').classList.toggle('d-none', !din);
+            $('colInicio2').classList.toggle('d-none', !din);
+            $('colFecha').className = din ? 'col-6' : 'col-12';
+            $('colFecha2').className = din ? 'col-6' : 'col-12';
+            $('etiquetaFecha').textContent = din ? 'Al' : 'Fecha del balance';
+            $('etiquetaComparar').textContent = din ? 'Comparar con otro periodo' : 'Comparar con otra fecha';
+            $('ayudaTipo').textContent = din
+                ? 'Suma lo registrado entre dos fechas: «Del 1 de enero al 31 de diciembre de 2026».'
+                : 'Las cuentas a una sola fecha: «Al 31 de diciembre de 2026».';
+            inicio.disabled = !din;
+            inicio2.disabled = !din || !switchComparar.checked;
+            if (din && !inicio.value && fecha.value) inicio.value = fecha.value.slice(0, 4) + '-01-01';
+            if (din && !inicio2.value) inicio2.value = unAnioAntes(inicio.value);
         }
+        document.querySelectorAll('input[name="tipo"]').forEach(r => r.addEventListener('change', aplicarTipo));
 
-        function cargarSelectCuentas(seleccion) {
-            const cat = catalogo();
-            selector.innerHTML = '<option value="" disabled selected>Selecciona una cuenta…</option>';
-            for (const rubro of RUBROS) {
-                if (!cat[rubro].length) continue;
-                const grupo = document.createElement('optgroup');
-                grupo.label = rubro;
-                for (const nombre of cat[rubro]) {
-                    const op = new Option(nombre, `${rubro}||${nombre}`);
-                    op.dataset.rubro = rubro;
-                    op.dataset.nombre = nombre;
-                    grupo.appendChild(op);
-                }
-                selector.appendChild(grupo);
-            }
-            selector.appendChild(new Option('＋ Agregar cuenta nueva…', 'CUSTOM'));
-            if (seleccion) selector.value = seleccion;
-            mostrarRubro();
-        }
+        const aplicarSwitch = () => {
+            $('bloqueComparar').classList.toggle('d-none', !switchComparar.checked);
+            $('campoComparar').value = switchComparar.checked ? '1' : '0';
+            fecha2.disabled = !switchComparar.checked;
+            inicio2.disabled = !switchComparar.checked || !esDinamico();
+        };
+        switchComparar.addEventListener('change', aplicarSwitch);
+        aplicarSwitch();
+        aplicarTipo();
 
-        function mostrarRubro() {
-            const op = selector.selectedOptions[0];
-            if (!op || !op.dataset.rubro) {
-                infoRubro.textContent = 'Elige una cuenta del catálogo.';
-                campoSeccion.value = campoRubro.value = '';
-                return;
+        [fecha, inicio].forEach(i => i.addEventListener('change', () => { sugerirComparacion(); }));
+        [fecha2, inicio2].forEach(i => i.addEventListener('change', () => { comparacionTocada = true; }));
+        [fecha, inicio, fecha2, inicio2].forEach(i => i.addEventListener('input', () => i.classList.remove('is-invalid')));
+
+        $('formFecha').addEventListener('submit', ev => {
+            const din = esDinamico();
+            let error = '';
+            const marca = (campo, msg) => { campo.classList.add('is-invalid'); if (!error) error = msg; };
+            if (!fecha.value) marca(fecha, 'Escribe la fecha del balance.');
+            if (din && !inicio.value) marca(inicio, 'Escribe el inicio del periodo.');
+            if (din && inicio.value && fecha.value && inicio.value > fecha.value) marca(inicio, 'El periodo está al revés: el inicio es después del fin.');
+            if (switchComparar.checked) {
+                if (!fecha2.value) marca(fecha2, 'Escribe la fecha para comparar.');
+                if (din && inicio2.value && fecha2.value && inicio2.value > fecha2.value) marca(inicio2, 'El periodo para comparar está al revés.');
+                const mismo = fecha2.value === fecha.value && (!din || inicio2.value === inicio.value);
+                if (mismo) marca(fecha2, din ? 'Para comparar, elige otro periodo.' : 'Para comparar, elige una fecha distinta a la del balance.');
             }
-            const seccion = SECCION_DE[op.dataset.rubro];
-            campoSeccion.value = seccion;
-            campoRubro.value = op.dataset.rubro;
-            infoRubro.innerHTML = '';
+            if (error) {
+                ev.preventDefault();
+                aviso(error, 'error');
+            }
+        });
+
+        // ------------------------------------------------ Clasificaciones (se leen del select del modal)
+        const COLOR = { 'Activo': 'chip-activo', 'Pasivo': 'chip-pasivo', 'Capital contable': 'chip-capital' };
+        const CLASIF = {};
+        $('nuevaClasif').querySelectorAll('optgroup').forEach(g => g.querySelectorAll('option').forEach(o => {
+            CLASIF[o.value] = { seccion: g.label, etiqueta: o.textContent.trim(), descripcion: o.dataset.descripcion || '' };
+        }));
+
+        /** Pinta "[Activo] › Circulante (corto plazo) [resta]" */
+        function pintarClasif(contenedor, codigo, resta) {
+            contenedor.innerHTML = '';
+            const c = CLASIF[codigo];
+            if (!c) { contenedor.textContent = 'Elige una cuenta del catálogo.'; return; }
             const chip = document.createElement('span');
-            chip.className = 'chip ' + (COLOR_SECCION[seccion] || '');
-            chip.textContent = seccion;
+            chip.className = 'chip ' + (COLOR[c.seccion] || '');
+            chip.textContent = c.seccion;
             const sub = document.createElement('span');
-            sub.textContent = '› ' + op.dataset.rubro;
-            infoRubro.append(chip, sub);
+            sub.textContent = '› ' + c.etiqueta.split(' › ').slice(1).join(' › ');
+            contenedor.append(chip, sub);
+            if (resta) {
+                const r = document.createElement('span');
+                r.className = 'chip chip-resta';
+                r.textContent = 'resta';
+                r.title = 'Cuenta complementaria: su importe se resta';
+                contenedor.append(r);
+            }
         }
 
-        let seleccionPrevia = '';
-        selector.addEventListener('focus', () => { seleccionPrevia = selector.value; });
+        // ------------------------------------------------ Selector "Cuenta" (el select queda oculto; se usa el buscador)
+        const selector = $('selectorCuenta');
         selector.addEventListener('change', () => {
-            selector.classList.remove('is-invalid');
-            if (selector.value === 'CUSTOM') {
-                selector.value = seleccionPrevia || '';
-                mostrarRubro();
-                bootstrap.Modal.getOrCreateInstance($('modalCuenta')).show();
+            const op = selector.selectedOptions[0];
+            pintarClasif($('infoClasif'), op && op.dataset.clasif, op && op.dataset.resta === 'true');
+        });
+
+        /** minúsculas y sin acentos, para buscar "deprecia" y encontrar "Depreciación" */
+        const normal = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+        /** ¿El elemento (con data-seccion, data-plazo, data-resta, data-usada) pasa los filtros? */
+        const pasaFiltros = (d, f) => (!f.seccion || d.seccion === f.seccion) && (!f.plazo || d.plazo === f.plazo)
+            && (!f.resta || d.resta === 'true') && (!f.usada || d.usada === 'true');
+
+        /** Todas las palabras de la búsqueda deben aparecer en el texto. */
+        const coincide = (texto, consulta) => normal(consulta).split(/\s+/).filter(Boolean).every(p => normal(texto).includes(p));
+
+        /** Chips de filtros: sección (una), plazo (una o ninguna), restan y usadas (prender/apagar). */
+        function conectarFiltros(contenedor, alCambiar) {
+            const f = { seccion: '', plazo: '', resta: false, usada: false };
+            contenedor.querySelectorAll('.filtro').forEach(b => b.addEventListener('click', () => {
+                if ('seccion' in b.dataset) {
+                    f.seccion = b.dataset.seccion;
+                    contenedor.querySelectorAll('[data-seccion]').forEach(x => x.classList.toggle('activo', x === b));
+                } else if ('plazo' in b.dataset) {
+                    f.plazo = f.plazo === b.dataset.plazo ? '' : b.dataset.plazo;
+                    contenedor.querySelectorAll('[data-plazo]').forEach(x => x.classList.toggle('activo', x.dataset.plazo === f.plazo));
+                } else if ('resta' in b.dataset) {
+                    f.resta = !f.resta;
+                    b.classList.toggle('activo', f.resta);
+                } else if ('usada' in b.dataset) {
+                    f.usada = !f.usada;
+                    b.classList.toggle('activo', f.usada);
+                }
+                alCambiar();
+            }));
+            return f;
+        }
+
+        // ---- Buscador del panel "Registrar cuenta"
+        const buscar = $('buscarCuenta'), lista = $('resultadosCuenta');
+        let marcada = -1, visibles = [];
+        const filtrosCuenta = conectarFiltros($('filtrosCuenta'), () => { abrir(); buscar.focus(); });
+
+        function resaltar(nombre, consulta) {
+            const span = document.createElement('span');
+            const palabras = normal(consulta).split(/\s+/).filter(Boolean);
+            if (!palabras.length) { span.textContent = nombre; return span; }
+            // Marca las letras que coinciden (comparando sin acentos)
+            const n = normal(nombre);
+            const marcas = new Array(nombre.length).fill(false);
+            palabras.forEach(p => { let k = n.indexOf(p); while (k >= 0) { for (let x = k; x < k + p.length; x++) marcas[x] = true; k = n.indexOf(p, k + 1); } });
+            let actual = null;
+            [...nombre].forEach((ch, x) => {
+                if (!actual || (actual.tagName === 'MARK') !== marcas[x]) {
+                    actual = marcas[x] ? document.createElement('mark') : document.createElement('span');
+                    span.appendChild(actual);
+                }
+                actual.textContent += ch;
+            });
+            return span;
+        }
+
+        function pintarResultados() {
+            const consulta = buscar.value.trim();
+            const elegida = selector.value;
+            const yaElegida = elegida && selector.selectedOptions[0] && selector.selectedOptions[0].dataset.nombre === consulta;
+            const q = yaElegida ? '' : consulta;   // si ya eligió, muestra todo para poder cambiar
+            lista.innerHTML = '';
+            visibles = [];
+            selector.querySelectorAll('optgroup').forEach(g => {
+                const ops = [...g.querySelectorAll('option')].filter(o => pasaFiltros(o.dataset, filtrosCuenta)
+                    && coincide(o.dataset.nombre + ' ' + g.label, q));
+                if (!ops.length) return;
+                const t = document.createElement('div');
+                t.className = 'grupo';
+                t.textContent = g.label;
+                lista.appendChild(t);
+                ops.forEach(o => {
+                    const item = document.createElement('div');
+                    item.className = 'opcion' + (o.value === elegida ? ' seleccionada' : '');
+                    item.setAttribute('role', 'option');
+                    item.id = 'opcion-' + o.value;
+                    item.appendChild(resaltar(o.dataset.nombre, q));
+                    if (o.dataset.resta === 'true') {
+                        const r = document.createElement('span');
+                        r.className = 'chip chip-resta';
+                        r.textContent = 'resta';
+                        item.appendChild(r);
+                    }
+                    item.addEventListener('mousedown', ev => { ev.preventDefault(); elegir(o); });
+                    lista.appendChild(item);
+                    visibles.push({ item, o });
+                });
+            });
+            const pie = document.createElement('div');
+            pie.className = 'pie';
+            pie.textContent = visibles.length === 0 ? 'Ninguna cuenta coincide. ' : (visibles.length === 1 ? '1 cuenta · ' : visibles.length + ' cuentas · ');
+            const nueva = document.createElement('a');
+            nueva.href = '#';
+            nueva.className = 'nueva';
+            nueva.textContent = q ? `＋ Agregar «${q}» como cuenta nueva` : '＋ Agregar una cuenta nueva';
+            nueva.addEventListener('mousedown', ev => { ev.preventDefault(); cerrar(); abrirNueva(q); });
+            pie.appendChild(nueva);
+            lista.appendChild(pie);
+            marcada = visibles.length ? 0 : -1;
+            const idx = visibles.findIndex(v => v.o.value === elegida);
+            if (idx >= 0) marcada = idx;
+            marcar();
+        }
+        function marcar() {
+            visibles.forEach((v, k) => v.item.classList.toggle('marcada', k === marcada));
+            const v = visibles[marcada];
+            if (v) { v.item.scrollIntoView({ block: 'nearest' }); buscar.setAttribute('aria-activedescendant', v.item.id); }
+            else buscar.removeAttribute('aria-activedescendant');
+        }
+        let cierre = null;
+        function abrir() { clearTimeout(cierre); pintarResultados(); lista.hidden = false; buscar.setAttribute('aria-expanded', 'true'); }
+        function cerrar() { lista.hidden = true; buscar.setAttribute('aria-expanded', 'false'); }
+        function elegir(o) {
+            selector.value = o.value;
+            selector.dispatchEvent(new Event('change'));
+            buscar.value = o.dataset.nombre;
+            buscar.classList.remove('is-invalid');
+            cerrar();
+            $('saldoImporteVisual').focus();
+        }
+        buscar.addEventListener('focus', abrir);
+        buscar.addEventListener('click', abrir);
+        buscar.addEventListener('input', () => {
+            buscar.classList.remove('is-invalid');
+            if (selector.value && selector.selectedOptions[0].dataset.nombre !== buscar.value) {
+                selector.value = '';
+                selector.dispatchEvent(new Event('change'));
+            }
+            abrir();
+        });
+        buscar.addEventListener('keydown', ev => {
+            if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+                ev.preventDefault();
+                if (lista.hidden) { abrir(); return; }
+                if (!visibles.length) return;
+                marcada = (marcada + (ev.key === 'ArrowDown' ? 1 : -1) + visibles.length) % visibles.length;
+                marcar();
+            } else if (ev.key === 'Enter') {
+                if (!lista.hidden && visibles[marcada]) { ev.preventDefault(); elegir(visibles[marcada].o); }
+            } else if (ev.key === 'Escape') {
+                cerrar();
+            }
+        });
+        buscar.addEventListener('blur', () => { clearTimeout(cierre); cierre = setTimeout(cerrar, 120); });
+        $('limpiarBusqueda').addEventListener('click', () => {
+            buscar.value = '';
+            selector.value = '';
+            selector.dispatchEvent(new Event('change'));
+            buscar.focus();
+        });
+
+        // ---- Barras de filtros de "Cuentas registradas" y "Catálogo"
+        document.querySelectorAll('.barra-filtro').forEach(barra => {
+            const texto = barra.querySelector('.filtro-texto');
+            const conteo = barra.querySelector('.filtro-conteo');
+            const elementos = () => [...document.querySelectorAll(barra.dataset.filtra)];
+            let f;
+            const aplicar = () => {
+                const q = texto.value.trim();
+                const els = elementos();
+                let n = 0;
+                els.forEach(el => {
+                    const ok = pasaFiltros(el.dataset, f) && coincide(el.dataset.buscar, q);
+                    el.hidden = !ok;
+                    if (ok) n++;
+                });
+                const hayFiltro = q || f.seccion || f.plazo || f.resta || f.usada;
+                conteo.textContent = hayFiltro ? `${n} de ${els.length}` : `${els.length} cuentas`;
+                // Catálogo: esconde grupos y secciones vacíos; tabla: fila de "sin coincidencias"
+                document.querySelectorAll('#catalogoCuentas .cat-grupo').forEach(g => {
+                    if (!barra.dataset.filtra.startsWith('#catalogoCuentas')) return;
+                    const conCuentas = g.querySelector('li[data-buscar]');
+                    g.hidden = hayFiltro && (!conCuentas || !g.querySelector('li[data-buscar]:not([hidden])'));
+                });
+                document.querySelectorAll('#catalogoCuentas .cat-seccion').forEach(sec => {
+                    if (!barra.dataset.filtra.startsWith('#catalogoCuentas')) return;
+                    sec.hidden = hayFiltro && !sec.querySelector('.cat-grupo:not([hidden]) li[data-buscar]:not([hidden])');
+                });
+                const sin = document.querySelector('#tablaSaldos .sin-coincidencias');
+                if (sin && barra.dataset.filtra.startsWith('#tablaSaldos')) sin.hidden = n > 0;
+            };
+            f = conectarFiltros(barra, aplicar);
+            texto.addEventListener('input', aplicar);
+            aplicar();
+        });
+
+        // ------------------------------------------------ Registrar cuenta en el balance
+        const importeSaldo = Importe.conectar($('saldoImporteVisual'), $('saldoImporte'), $('saldoImporteAyuda'));
+        $('formSaldo').addEventListener('submit', ev => {
+            ev.preventDefault();
+            const op = selector.selectedOptions[0];
+            let ok = true;
+            let mensaje = '';
+            if (!op || !op.dataset.clasif) { buscar.classList.add('is-invalid'); ok = false; mensaje = 'Elige una cuenta: búscala y haz clic en ella.'; }
+            const fr = $('saldoFecha');
+            if (fr.type === 'date' && (!fr.value || (fr.min && fr.value < fr.min) || (fr.max && fr.value > fr.max))) {
+                fr.classList.add('is-invalid'); ok = false; mensaje = mensaje || 'La fecha del registro debe estar dentro del periodo.';
+            }
+            if (!importeSaldo.validar(true)) { ok = false; mensaje = mensaje || 'Revisa el importe.'; }
+            if (!ok) {
+                aviso(mensaje, 'error');
                 return;
             }
-            seleccionPrevia = selector.value;
-            mostrarRubro();
-        });
-
-        cargarSelectCuentas();
-
-        // ------------------------------------------------ Modal: nueva cuenta
-        const modalCuenta = $('modalCuenta');
-        const inputNueva = $('inputNuevaCuenta');
-        modalCuenta.addEventListener('show.bs.modal', () => {
-            inputNueva.value = '';
-            inputNueva.classList.remove('is-invalid');
-            const op = selector.selectedOptions[0];
-            if (op && op.dataset.rubro) selRubro.value = op.dataset.rubro;   // sugiere el rubro de la cuenta actual
-        });
-        modalCuenta.addEventListener('shown.bs.modal', () => inputNueva.focus());
-        inputNueva.addEventListener('input', () => inputNueva.classList.remove('is-invalid'));
-
-        $('formNuevaCuenta').addEventListener('submit', ev => {
-            ev.preventDefault();
-            const nombre = inputNueva.value.trim().replace(/\s+/g, ' ');
-            const rubro = selRubro.value;
-            if (!nombre) { inputNueva.classList.add('is-invalid'); inputNueva.focus(); return; }
-
-            const yaExiste = catalogo()[rubro].find(n => igual(n, nombre));
-            if (!yaExiste) {
-                const propias = leer(LS_CUENTAS, []);
-                propias.push({ nombre, rubro });
-                guardar(LS_CUENTAS, propias);
-            }
-            const valor = `${rubro}||${yaExiste || nombre}`;
-            cargarSelectCuentas(valor);
-            seleccionPrevia = valor;
-            bootstrap.Modal.getOrCreateInstance(modalCuenta).hide();
-            aviso(yaExiste ? `“${yaExiste}” ya estaba en ${rubro}; la dejé seleccionada.`
-                : `Cuenta agregada: ${nombre} (${rubro}).`);
-            setTimeout(() => $('importeVisual').focus(), 350);
-        });
-
-        // ------------------------------------------------ Importe
-        const importeVisual = $('importeVisual');
-        const importeReal = $('importeReal');
-        importeVisual.addEventListener('input', () => {
-            importeVisual.classList.remove('is-invalid');
-            let v = importeVisual.value.replace(/[^0-9.]/g, '');
-            const punto = v.indexOf('.');
-            if (punto !== -1) v = v.slice(0, punto + 1) + v.slice(punto + 1).replace(/\./g, '').slice(0, 2);
-            const [entero, decimales] = v.split('.');
-            const enteroFmt = entero ? Number(entero).toLocaleString('en-US') : (decimales !== undefined ? '0' : '');
-            importeVisual.value = decimales !== undefined ? `${enteroFmt}.${decimales}` : enteroFmt;
-            const numero = parseFloat(v);
-            importeReal.value = isNaN(numero) ? '' : String(numero);
-        });
-
-        // ------------------------------------------------ Envío del movimiento
-        $('formCuenta').addEventListener('submit', ev => {
-            ev.preventDefault();
-            const op = selector.selectedOptions[0];
-            const importe = parseFloat(importeReal.value);
-            let ok = true;
-            if (!op || !op.dataset.rubro) { selector.classList.add('is-invalid'); ok = false; }
-            if (!(importe > 0)) { importeVisual.classList.add('is-invalid'); ok = false; }
-            if (!ok) return;
-
-            $('nombreRealCuenta').value = op.dataset.nombre;
-            mostrarRubro();
+            $('saldoCuentaId').value = op.value;
             const btn = $('btnRegistrar');
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Registrando…';
             ev.target.submit();
         });
 
-        // ------------------------------------------------ Modal: eliminar movimiento
-        const modalEliminar = $('modalEliminar');
-        modalEliminar.addEventListener('show.bs.modal', ev => {
-            const btn = ev.relatedTarget;
-            if (!btn) return;
-            $('formEliminar').action = btn.dataset.url;
-            $('elimNombre').textContent = btn.dataset.nombre || '';
-            $('elimDetalle').textContent = btn.dataset.detalle || '';
-            $('elimImporte').textContent = btn.dataset.importe || '';
-            const confirmar = $('btnEliminar');
-            confirmar.disabled = false;
-            confirmar.innerHTML = '<i class="bi bi-trash3 me-1"></i>Sí, eliminar';
+        // ------------------------------------------------ Modal: cuenta nueva (con sugerencia de clasificación)
+        const modalCuenta = $('modalCuenta');
+        const nNombre = $('nuevaNombre'), nClasif = $('nuevaClasif'), nResta = $('nuevaResta');
+        const importeNueva = Importe.conectar($('nuevaImporteVisual'), $('nuevaImporte'), $('nuevaImporteAyuda'),
+            { opcional: true, base: 'Déjalo vacío para solo agregarla al catálogo.' });
+        let tocada = false, consulta = 0, temporizador = null;
+
+        const ayudaClasif = () => {
+            const c = CLASIF[nClasif.value];
+            $('nuevaClasifAyuda').textContent = c ? c.descripcion : '';
+        };
+        modalCuenta.addEventListener('show.bs.modal', () => {
+            nNombre.value = '';
+            nNombre.classList.remove('is-invalid');
+            nClasif.value = '';
+            nClasif.classList.remove('is-invalid');
+            nResta.checked = false;
+            importeNueva.reiniciar();
+            $('sugerencia').classList.remove('visible');
+            tocada = false;
+            ayudaClasif();
+            const b = $('btnAgregarCuenta');
+            b.disabled = false;
+            b.innerHTML = '<i class="bi bi-plus-lg me-1"></i>Agregar cuenta';
         });
-        $('formEliminar').addEventListener('submit', () => {
-            const confirmar = $('btnEliminar');
-            confirmar.disabled = true;
-            confirmar.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Eliminando…';
+        modalCuenta.addEventListener('shown.bs.modal', () => {
+            if (nombrePrevio) { nNombre.value = nombrePrevio; nombrePrevio = ''; sugerir(); }
+            nNombre.focus();
+        });
+        let nombrePrevio = '';
+        function abrirNueva(nombre) {
+            nombrePrevio = nombre || '';
+            bootstrap.Modal.getOrCreateInstance(modalCuenta).show();
+        }
+        nClasif.addEventListener('change', () => { tocada = true; nClasif.classList.remove('is-invalid'); ayudaClasif(); });
+        nResta.addEventListener('change', () => { tocada = true; });
+
+        async function sugerir() {
+            const nombre = nNombre.value.trim();
+            const yo = ++consulta;
+            const caja = $('sugerencia');
+            if (nombre.length < 3) { caja.classList.remove('visible'); return; }
+            try {
+                const r = await (await fetch(CONFIG.urlSugerir + '?nombre=' + encodeURIComponent(nombre))).json();
+                if (yo !== consulta) return;   // ya escribieron otra cosa
+                if (!r.clasificacion) { caja.classList.remove('visible'); return; }
+                caja.innerHTML = '<i class="bi bi-lightbulb me-1"></i><strong></strong><span></span>';
+                caja.querySelector('strong').textContent = 'Parece ' + r.etiqueta + (r.resta ? ' · resta' : '') + '. ';
+                caja.querySelector('span').textContent = r.motivo + (tocada ? '' : ' (ya la elegí abajo)');
+                caja.classList.add('visible');
+                if (!tocada) {
+                    nClasif.value = r.clasificacion;
+                    nResta.checked = !!r.resta;
+                    nClasif.classList.remove('is-invalid');
+                    ayudaClasif();
+                }
+            } catch (e) { /* sin sugerencia: no pasa nada */ }
+        }
+        nNombre.addEventListener('input', () => {
+            nNombre.classList.remove('is-invalid');
+            clearTimeout(temporizador);
+            temporizador = setTimeout(sugerir, 250);
+        });
+
+        $('formNuevaCuenta').addEventListener('submit', async ev => {
+            ev.preventDefault();
+            const nombre = nNombre.value.trim().replace(/\s+/g, ' ');
+            let ok = true;
+            if (!nombre) { $('errorNuevaCuenta').textContent = 'Escribe el nombre de la cuenta.'; nNombre.classList.add('is-invalid'); ok = false; }
+            if (!nClasif.value) { nClasif.classList.add('is-invalid'); ok = false; }
+            if (!importeNueva.validar(true)) ok = false;
+            if (!ok) return;
+            const boton = $('btnAgregarCuenta');
+            boton.disabled = true;
+            boton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando…';
+            try {
+                const resp = await fetch(CONFIG.urlCuentas, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        nombre, clasificacion: nClasif.value, resta: nResta.checked ? '1' : '0',
+                        importe: $('nuevaImporte').value, fecha: $('saldoFecha').value || CONFIG.fecha
+                    })
+                });
+                const r = await resp.json();
+                if (!r.ok) {
+                    $('errorNuevaCuenta').textContent = r.mensaje || 'No se pudo guardar.';
+                    nNombre.classList.add('is-invalid');
+                    return;
+                }
+                window.location.assign(CONFIG.urlInicio);   // recarga con el aviso y la cuenta ya en el catálogo
+            } catch (e) {
+                aviso('No se pudo guardar la cuenta: ' + e.message, 'error');
+            } finally {
+                boton.disabled = false;
+                boton.innerHTML = '<i class="bi bi-plus-lg me-1"></i>Agregar cuenta';
+            }
+        });
+
+        // ------------------------------------------------ Modal: editar cuenta del balance
+        const editCuenta = $('editCuenta');
+        const importeEdit = Importe.conectar($('editImporteVisual'), $('editImporte'), $('editImporteAyuda'));
+        const pintarEdit = () => {
+            const op = editCuenta.selectedOptions[0];
+            pintarClasif($('editInfoClasif'), op && op.dataset.clasif, op && op.dataset.resta === 'true');
+        };
+        $('modalEditar').addEventListener('show.bs.modal', ev => {
+            const b = ev.relatedTarget;
+            if (!b) return;
+            // Copia el catálogo; si la cuenta ya no está en el catálogo, se queda como "cuenta actual"
+            editCuenta.innerHTML = selector.innerHTML;
+            editCuenta.querySelectorAll('option[value=""], option[value="CUSTOM"]').forEach(o => o.remove());
+            let op = [...editCuenta.options].find(o => o.dataset.clasif === b.dataset.clasif &&
+                o.dataset.nombre.toLowerCase() === b.dataset.nombre.toLowerCase());
+            if (!op) {
+                op = new Option(b.dataset.nombre + ' (cuenta actual)', 'ACTUAL');
+                op.dataset.nombre = b.dataset.nombre;
+                op.dataset.clasif = b.dataset.clasif;
+                op.dataset.resta = b.dataset.resta;
+                editCuenta.prepend(op);
+            }
+            editCuenta.value = op.value;
+            pintarEdit();
+            $('editId').value = b.dataset.id;
+            $('editFecha').value = b.dataset.fecha;
+            $('editFecha').classList.remove('is-invalid');
+            $('editComentario').value = b.dataset.comentario || '';
+            const r = Importe.leer(b.dataset.importe);
+            $('editImporteVisual').value = r.ok ? r.texto : b.dataset.importe;
+            importeEdit.validar(false);
+            $('btnGuardarEdicion').disabled = false;
+        });
+        editCuenta.addEventListener('change', pintarEdit);
+        $('formEditar').addEventListener('submit', ev => {
+            ev.preventDefault();
+            let ok = !!editCuenta.selectedOptions[0];
+            if (!$('editFecha').value) { $('editFecha').classList.add('is-invalid'); ok = false; }
+            if (!importeEdit.validar(true)) ok = false;
+            if (!ok) return;
+            $('editCuentaId').value = editCuenta.value === 'ACTUAL' ? '' : editCuenta.value;
+            $('btnGuardarEdicion').disabled = true;
+            ev.target.submit();
+        });
+
+        // ------------------------------------------------ Modales de confirmación
+        const confirmar = (modalId, formId, llenar) => {
+            $(modalId).addEventListener('show.bs.modal', ev => {
+                const b = ev.relatedTarget;
+                if (!b) return;
+                $(formId).action = b.dataset.url;
+                $(formId).querySelector('button').disabled = false;
+                llenar(b.dataset);
+            });
+            $(formId).addEventListener('submit', () => { $(formId).querySelector('button').disabled = true; });
+        };
+        confirmar('modalEliminar', 'formEliminar', d => {
+            $('elimNombre').textContent = d.nombre || '';
+            $('elimDetalle').textContent = d.detalle || '';
+            $('elimImporte').textContent = d.importe || '';
+        });
+        confirmar('modalEliminarCuenta', 'formEliminarCuenta', d => {
+            $('elimCuentaNombre').textContent = d.nombre || '';
+            $('elimCuentaClasif').textContent = d.clasif || '';
+            const n = Number(d.usos || 0);
+            $('elimCuentaUsos').textContent = n === 0 ? 'No se usa en ningún balance' : (n === 1 ? 'Está en 1 balance (no cambia)' : `Está en ${n} balances (no cambian)`);
         });
 
         // ------------------------------------------------ Exportar PDF
         const btnPDF = $('btnPDF');
         const textoBtnPDF = btnPDF.innerHTML;
-        btnPDF.addEventListener('click', async () => {
-            btnPDF.disabled = true;
+        let generando = false;
+
+        async function generarPDF(tipo, forzar) {
+            if (generando) return;
+            if (tipo === 'BG' && CONFIG.vacio) { aviso('Este balance no tiene cuentas con importe. Registra cuentas primero.', 'alerta'); return; }
+            if (tipo === 'BG' && !CONFIG.cuadra && !forzar) { bootstrap.Modal.getOrCreateInstance($('modalNoCuadra')).show(); return; }
+            generando = true;
+            btnPDF.setAttribute('aria-busy', 'true');
             btnPDF.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generando…';
             try {
                 if (!window.jspdf) throw new Error('no cargó la librería jsPDF (¿sin internet?)');
-                const respuesta = await fetch(URL_REPORTE, { headers: { Accept: 'application/json' } });
-                if (!respuesta.ok) throw new Error('el servidor respondió ' + respuesta.status);
-                const reporte = await respuesta.json();
-                const meta = datosActuales();
-                PDFContable.crear(reporte, meta).save(PDFContable.nombreArchivo(meta));
+                const resp = await fetch(tipo === 'COMP' ? CONFIG.urlComparativo : CONFIG.urlBalance, { headers: { Accept: 'application/json' } });
+                const datos = await resp.json();
+                if (!resp.ok) throw new Error(datos.mensaje || 'el servidor respondió ' + resp.status);
+                if (tipo === 'COMP') {
+                    PDFContable.comparativo(datos).save(PDFContable.nombreComparativo(datos));
+                } else {
+                    PDFContable.balance(datos, { comentarios: toggle.checked, noCuadra: !datos.cuadra })
+                        .save(PDFContable.nombreBalance(datos));
+                }
             } catch (e) {
                 aviso('No se pudo generar el PDF: ' + e.message, 'error');
             } finally {
-                btnPDF.disabled = false;
+                generando = false;
+                btnPDF.removeAttribute('aria-busy');
                 btnPDF.innerHTML = textoBtnPDF;
             }
+        }
+        document.querySelectorAll('[data-pdf]').forEach(item => item.addEventListener('click', () => {
+            // Ojo: no se deshabilita el botón del menú; si se deshabilita, Bootstrap ya no lo vuelve a abrir
+            bootstrap.Dropdown.getOrCreateInstance(btnPDF).hide();
+            generarPDF(item.dataset.pdf, false);
+        }));
+        $('btnPdfIgual').addEventListener('click', () => {
+            bootstrap.Modal.getOrCreateInstance($('modalNoCuadra')).hide();
+            generarPDF('BG', true);
         });
     })();
+    // UI-END
 </script>
 
 </body>
